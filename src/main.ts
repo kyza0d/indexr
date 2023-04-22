@@ -9,7 +9,6 @@ import Fuse from "fuse.js";
 // Define the structure of an item
 interface Item {
   Name: string;
-  Icon: string;
 }
 
 // Load items from a JSON file
@@ -27,18 +26,37 @@ async function renderNames(query?: string): Promise<void> {
   const items = await loadItems();
 
   // Extract names from the loaded items
-  const names = items.map(({ Name }: Item) => Name);
+  const names = items.map(({ Name: Name }: Item) => Name);
+
+  // Define a function to render a single name
+  const renderName = (name: string) => {
+    const paragraph = document.createElement("p");
+    paragraph.innerHTML = name;
+    container.appendChild(paragraph);
+  };
+
+  // Define a function to highlight search matches
+  const highlightMatches = ({ item, matches }: any) => {
+    let highlightedText = "";
+    let lastIndex = 0;
+    matches.forEach(({ indices }: any) => {
+      indices.forEach(([start, end]: number[]) => {
+        const beforeMatch = item.slice(lastIndex, start);
+        const matchedText = item.slice(start, end + 1);
+        highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
+        lastIndex = end + 1;
+      });
+    });
+    highlightedText += item.slice(lastIndex);
+    return highlightedText;
+  };
 
   // Clear the container
   container.innerHTML = "";
 
   // If no search query or the query is too short, render all names
   if (!query || query.length < 2) {
-    names.forEach((name: string) => {
-      const paragraph = document.createElement("p");
-      paragraph.textContent = name;
-      container.appendChild(paragraph);
-    });
+    names.forEach(renderName);
   } else {
     // Create a fuzzy search instance
     const fuse = new Fuse(names, {
@@ -47,27 +65,9 @@ async function renderNames(query?: string): Promise<void> {
       includeMatches: true,
     });
 
-    // Search for the query in the names
+    // Search for the query in the names and render the results
     const searchResults = fuse.search(query);
-
-    // Render the search results
-    searchResults.forEach(({ item, matches }: any) => {
-      const paragraph = document.createElement("p");
-      let highlightedText = "";
-      let lastIndex = 0;
-      matches.forEach(({ indices }: any) => {
-        indices.forEach(([start, end]: number[]) => {
-          highlightedText += `${item.slice(lastIndex, start)}<mark>${item.slice(
-            start,
-            end + 1
-          )}</mark>`;
-          lastIndex = end + 1;
-        });
-      });
-      highlightedText += item.slice(lastIndex);
-      paragraph.innerHTML = highlightedText;
-      container.appendChild(paragraph);
-    });
+    searchResults.map(highlightMatches).forEach(renderName);
   }
 }
 
