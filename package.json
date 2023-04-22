@@ -12,5 +12,8 @@
     "fuse.js": "^6.6.2",
     "typescript": "^5.0.2",
     "vite": "^4.3.0"
+  },
+  "dependencies": {
+    "inter-font": "^3.19.0"
   }
 }

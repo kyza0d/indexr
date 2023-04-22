@@ -40,6 +40,11 @@
   "resolved" "https://registry.npmjs.org/fuse.js/-/fuse.js-6.6.2.tgz"
   "version" "6.6.2"
 
+"inter-font@^3.19.0":
+  "integrity" "sha512-LKPEweQxslLgp6VaTZuz8vRC8dHsAMy8b28yipwQgcKlYSYJH//lCsLGXpH9cjOQ61K4SiEWCSrItVs8c9As4A=="
+  "resolved" "https://registry.npmjs.org/inter-font/-/inter-font-3.19.0.tgz"
+  "version" "3.19.0"
+
 "nanoid@^3.3.6":
   "integrity" "sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA=="
   "resolved" "https://registry.npmjs.org/nanoid/-/nanoid-3.3.6.tgz"
