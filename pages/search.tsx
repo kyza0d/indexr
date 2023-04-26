@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
+
 import Fuse from "fuse.js";
 
 interface Item {
@@ -10,23 +11,30 @@ const loadItems = async (): Promise<Item[]> => {
   return response.json();
 };
 
-const highlightMatches = ({ item, matches }: any) => {
-  let highlightedText = "";
-  let lastIndex = 0;
-  matches.forEach(({ indices }: any) => {
-    indices.forEach(([start, end]: number[]) => {
-      const beforeMatch = item.slice(lastIndex, start);
-      const matchedText = item.slice(start, end + 1);
-      highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
-      lastIndex = end + 1;
-    });
-  });
-  highlightedText += item.slice(lastIndex);
-  return highlightedText;
-};
-
 const Search = () => {
+  const searchInput = useRef<HTMLInputElement>(null);
   const [names, setNames] = useState<string[]>([]);
+
+  const highlightMatches = ({ item, matches }: any) => {
+    let highlightedText = "";
+    let lastIndex = 0;
+    matches.forEach(({ indices }: any) => {
+      indices.forEach(([start, end]: number[]) => {
+        const beforeMatch = item.slice(lastIndex, start);
+        const matchedText = item.slice(start, end + 1);
+        if (matchedText == searchInput.current?.value) {
+          highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
+          lastIndex = end + 1;
+        }
+      });
+      highlightedText += item.slice(lastIndex);
+    });
+    return highlightedText;
+  };
+
+  const renderName = (name: string) => {
+    return <p dangerouslySetInnerHTML={{ __html: name }} />;
+  };
 
   useEffect(() => {
     const loadNames = async () => {
@@ -38,10 +46,6 @@ const Search = () => {
   }, []);
 
   const [query, setQuery] = useState<string>("");
-
-  const renderName = (name: string) => {
-    return <p dangerouslySetInnerHTML={{ __html: name }} />;
-  };
 
   const debounce = (fn: any, delay: number) => {
     let timeoutId: any;
@@ -74,7 +78,12 @@ const Search = () => {
 
   return (
     <div>
-      <input id="search" type="text" onChange={handleInputChange} />
+      <input
+        ref={searchInput}
+        id="search"
+        type="text"
+        onChange={handleInputChange}
+      />
       <div id="names">{searchResults()}</div>
     </div>
   );
