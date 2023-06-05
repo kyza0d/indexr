@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+input {
+  color: black
+}
+
 #search {
   min-width: 300px;
   padding: 11px 9px;
