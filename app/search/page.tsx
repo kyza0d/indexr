@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect, ChangeEvent } from "react";
 import Fuse from "fuse.js";
+import { debounce } from "@/utils";
 
 interface Item {
   Name: string;
@@ -60,63 +61,55 @@ const Search = () => {
     const results = fuse.current?.search(query) ?? [];
     const renderedResults = [];
 
+    const renderResultItem = (item: Item, result?: Record<string, any>) => {
+      return (
+        <div id="result">
+          {Object.entries(item).map(([key, value]) => (
+            <div key={key}>
+              <strong>{key}: </strong>
+              {key === "Name" && result ? (
+                <span
+                  dangerouslySetInnerHTML={{ __html: highlightMatches(result) }}
+                />
+              ) : (
+                <span>{value as string}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const renderLoadMore = (count: number) => {
+      if (count > displayedItemsCount) {
+        return [
+          <p key="more">{`${count - displayedItemsCount} more items...`}</p>,
+          <button onClick={loadMoreItems} key="load-more">
+            Load more
+          </button>,
+        ];
+      }
+      return null;
+    };
+
     if (query && query.length >= 2) {
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
         const result = results[i];
         const item = result.item;
-
         renderedResults.push(
-          <div key={i} id="result">
-            {Object.entries(item).map(([key, value]) =>
-              key == "Name" ? (
-                <div key={key}>
-                  <strong>{key}: </strong>
-                  {renderName(highlightMatches(result), i)}
-                </div>
-              ) : (
-                <div key={key}>
-                  <strong>{key}: </strong>
-                  <span>{value}</span>
-                </div>
-              )
-            )}
-          </div>
+          <div key={i}>{renderResultItem(item, result)}</div>
         );
       }
 
-      if (results.length > displayedItemsCount) {
-        renderedResults.push(
-          <p key="more">{`${results.length - displayedItemsCount
-            } more items...`}</p>,
-          <button onClick={loadMoreItems} key="load-more">
-            Load more
-          </button>
-        );
-      }
+      renderedResults.push(renderLoadMore(results.length));
     } else {
-      for (let i = 0; i < Math.min(displayedItemsCount, names.length); i++) {
-        const name = names[i];
-        renderedResults.push(
-          <div key={i} id="result">
-            {Object.entries(name).map(([key, value]) => (
-              <div key={key}>
-                <strong>{key}: </strong>
-                <span>{value}</span>
-              </div>
-            ))}
-          </div>
-        );
+      const namesToRender = names.slice(0, displayedItemsCount);
+      for (let i = 0; i < namesToRender.length; i++) {
+        const name = namesToRender[i];
+        renderedResults.push(<div key={i}>{renderResultItem(name)}</div>);
       }
 
-      if (names.length > displayedItemsCount) {
-        renderedResults.push(
-          <p key="more">{`${names.length - displayedItemsCount
-            } more items...`}</p>,
-          <button onClick={loadMoreItems} key="load-more">
-            Load more
-          </button>
-        );
-      }
+      renderedResults.push(renderLoadMore(names.length));
     }
 
     return renderedResults;
@@ -130,39 +123,22 @@ const Search = () => {
     loadNames();
   }, []);
 
-  const debounce = <T extends (...args: any[]) => void>(
-    fn: T,
-    delay: number
-  ) => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    return (...args: Parameters<T>) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => fn(...args), delay);
-    };
-  };
-
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
   }, 200);
 
-  const renderName = (name: string, index: number) => (
-    <span key={index} dangerouslySetInnerHTML={{ __html: name }} />
-  );
-
   return (
-    <>
-      <div id="search" className="p-4">
-        <h1>Index</h1>
-        <input
-          ref={searchInput}
-          className="border border-gray-500"
-          type="text"
-          onChange={handleInputChange}
-        />
-        <div id="names">{renderNames()}</div>
-      </div>
-    </>
+    <div id="search" className="p-4">
+      <h1>Index</h1>
+      <input
+        ref={searchInput}
+        className="border border-gray-500"
+        type="text"
+        onChange={handleInputChange}
+      />
+      <div id="names">{renderNames()}</div>
+    </div>
   );
 };
 
