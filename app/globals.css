@@ -2,31 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+body {
+  min-height: 100vh;
+}
+
 input {
   color: black
 }
 
-#search {
-  min-width: 300px;
+strong {
+font-weight: 600;
+}
+
+h1 {
+  font-size: 2.2em;
+  font-weight: 600;
+}
+
+#search  {
+  max-width: 70vw;
+  margin: 0 auto;
+  margin-top: 20vh;
+  min-height: 70vh;
+}
+#result {
+  margin-top: 12px;
+  background: #eaeaea;
+  border: 1px solid #b2b2b2;
+  padding: 12px;
+}
+
+#search input {
+  width: 100%;
   padding: 11px 9px;
 }
 
+
 mark {
   position: relative;
-  color: black;
+  color: white;
   background: transparent;
+  z-index: 1;
 }
 
 mark::before {
   content: "";
-  transform: translateY(-1px);
   position: absolute;
-  top: 0;
-  left: 0;
+  left: 50%;
+  top: 50%; /* Adjust the value as needed to position the pseudo-element above the text */
+  transform: translate(-50%, -50%);
   z-index: -1;
   width: 100%;
+  padding: 3px 8px;
   height: 100%;
-  background-color: yellow;
-  padding: 2px 0.5px 1px 0.5px;
-  border-radius: 5px;
+  border-radius: 2px;
+  background-color: #0d7cc6;
 }
