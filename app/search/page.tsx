@@ -1,22 +1,32 @@
 "use client";
 
 import React, { useRef, useState, useEffect, ChangeEvent } from "react";
+
 import Fuse from "fuse.js";
+
 import { debounce } from "@/utils";
 
 interface Item {
-  Name: string;
-  Glyph: string;
+  [key: string]: string;
 }
 
 const loadItems = async (): Promise<Item[]> => {
-  const response = await fetch("/items.json");
+  const response = await fetch("/users.json");
   const items = await response.json();
 
-  return items.map((item: Item) => ({
-    Name: item.Name,
-    Glyph: item.Glyph,
-  }));
+  // Determine the keys (property names) from the JSON items
+  const keys = Object.keys(items[0]);
+
+  return items.map((item: Item) => {
+    const newItem: Item = {};
+
+    // Copy properties from the item using the determined keys
+    keys.forEach((key) => {
+      newItem[key] = item[key];
+    });
+
+    return newItem;
+  });
 };
 
 const Search = () => {
@@ -29,15 +39,17 @@ const Search = () => {
   const highlightMatches = ({ item, matches }: any) => {
     let highlightedText = "";
     let lastIndex = 0;
+
     matches.forEach(({ indices }: any) => {
       indices.forEach(([start, end]: number[]) => {
         const beforeMatch = item.Name.slice(lastIndex, start);
         const matchedText = item.Name.slice(start, end + 1);
-        if (matchedText === searchInput.current?.value) {
+        if (matchedText.toLowerCase() === searchInput.current?.value.toLowerCase()) {
           highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
           lastIndex = end + 1;
         }
       });
+
       highlightedText += item.Name.slice(lastIndex);
     });
     return highlightedText;
@@ -68,9 +80,7 @@ const Search = () => {
             <div key={key}>
               <strong>{key}: </strong>
               {key === "Name" && result ? (
-                <span
-                  dangerouslySetInnerHTML={{ __html: highlightMatches(result) }}
-                />
+                <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
               ) : (
                 <span>{value as string}</span>
               )}
@@ -96,14 +106,13 @@ const Search = () => {
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
         const result = results[i];
         const item = result.item;
-        renderedResults.push(
-          <div key={i}>{renderResultItem(item, result)}</div>
-        );
+        renderedResults.push(<div key={i}>{renderResultItem(item, result)}</div>);
       }
 
       renderedResults.push(renderLoadMore(results.length));
     } else {
       const namesToRender = names.slice(0, displayedItemsCount);
+
       for (let i = 0; i < namesToRender.length; i++) {
         const name = namesToRender[i];
         renderedResults.push(<div key={i}>{renderResultItem(name)}</div>);
@@ -131,12 +140,7 @@ const Search = () => {
   return (
     <div id="search" className="p-4">
       <h1>Index</h1>
-      <input
-        ref={searchInput}
-        className="border border-gray-500"
-        type="text"
-        onChange={handleInputChange}
-      />
+      <input ref={searchInput} type="text" onChange={handleInputChange} />
       <div id="names">{renderNames()}</div>
     </div>
   );

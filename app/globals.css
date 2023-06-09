@@ -21,6 +21,10 @@ h1 {
   font-weight: 600;
 }
 
+#search  input {
+  border: 1px solid #b2b2b2;
+}
+
 #search  {
   max-width: 70vw;
   margin: 0 auto;
@@ -30,6 +34,7 @@ h1 {
 #result {
   margin-top: 12px;
   background: #eaeaea;
+  border-radius: 6px;
   border: 1px solid #b2b2b2;
   padding: 12px;
 }
