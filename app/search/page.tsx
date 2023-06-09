@@ -1,32 +1,38 @@
 "use client";
 
 import React, { useRef, useState, useEffect, ChangeEvent } from "react";
-
 import Fuse from "fuse.js";
-
 import { debounce } from "@/utils";
 
 interface Item {
   [key: string]: string;
 }
 
+const config = {
+  thumbnail: "code",
+};
+
 const loadItems = async (): Promise<Item[]> => {
-  const response = await fetch("/users.json");
-  const items = await response.json();
+  try {
+    const response = await fetch("/glyphnames.json");
+    const jsonData = await response.json();
 
-  // Determine the keys (property names) from the JSON items
-  const keys = Object.keys(items[0]);
-
-  return items.map((item: Item) => {
-    const newItem: Item = {};
-
-    // Copy properties from the item using the determined keys
-    keys.forEach((key) => {
-      newItem[key] = item[key];
-    });
-
-    return newItem;
-  });
+    if (Array.isArray(jsonData)) {
+      return jsonData;
+    } else if (typeof jsonData === "object") {
+      const items: Item[] = [];
+      for (const [key, value] of Object.entries(jsonData)) {
+        const newItem: Item = { Name: key, ...(value as Item) };
+        items.push(newItem);
+      }
+      return items;
+    } else {
+      throw new Error("Invalid JSON format");
+    }
+  } catch (error) {
+    console.error("Failed to load items:", error);
+    return [];
+  }
 };
 
 const Search = () => {
@@ -76,6 +82,15 @@ const Search = () => {
     const renderResultItem = (item: Item, result?: Record<string, any>) => {
       return (
         <div id="result">
+          {config.thumbnail && (
+            <div>
+              <span
+                className="icon"
+                dangerouslySetInnerHTML={{ __html: `&#x${item[config.thumbnail]};` }}
+              ></span>
+            </div>
+          )}
+
           {Object.entries(item).map(([key, value]) => (
             <div key={key}>
               <strong>{key}: </strong>

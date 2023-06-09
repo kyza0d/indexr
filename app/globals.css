@@ -8,6 +8,12 @@ body {
   min-height: 100vh;
 }
 
+.icon {
+  font-family: "Symbols Nerd Font", sans-serif;
+  font-size: 1.8em;
+  padding-right: 12px;
+}
+
 input {
   color: black
 }
