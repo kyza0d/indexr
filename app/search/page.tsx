@@ -12,9 +12,11 @@ const config = {
   thumbnail: "code",
 };
 
+const items_file = "/glyphnames.json";
+
 const loadItems = async (): Promise<Item[]> => {
   try {
-    const response = await fetch("/glyphnames.json");
+    const response = await fetch(items_file);
     const jsonData = await response.json();
 
     if (Array.isArray(jsonData)) {
@@ -22,7 +24,7 @@ const loadItems = async (): Promise<Item[]> => {
     } else if (typeof jsonData === "object") {
       const items: Item[] = [];
       for (const [key, value] of Object.entries(jsonData)) {
-        const newItem: Item = { Name: key, ...(value as Item) };
+        const newItem: Item = { id: key, ...(value as Item) };
         items.push(newItem);
       }
       return items;
@@ -48,15 +50,15 @@ const Search = () => {
 
     matches.forEach(({ indices }: any) => {
       indices.forEach(([start, end]: number[]) => {
-        const beforeMatch = item.Name.slice(lastIndex, start);
-        const matchedText = item.Name.slice(start, end + 1);
+        const beforeMatch = item.id.slice(lastIndex, start);
+        const matchedText = item.id.slice(start, end + 1);
         if (matchedText.toLowerCase() === searchInput.current?.value.toLowerCase()) {
           highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
           lastIndex = end + 1;
         }
       });
 
-      highlightedText += item.Name.slice(lastIndex);
+      highlightedText += item.id.slice(lastIndex);
     });
     return highlightedText;
   };
@@ -69,7 +71,7 @@ const Search = () => {
 
   useEffect(() => {
     fuse.current = new Fuse(names, {
-      keys: ["Name"],
+      keys: ["id"],
       threshold: 0.2,
       includeMatches: true,
     });
@@ -94,7 +96,7 @@ const Search = () => {
           {Object.entries(item).map(([key, value]) => (
             <div key={key}>
               <strong>{key}: </strong>
-              {key === "Name" && result ? (
+              {key === "id" && result ? (
                 <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
               ) : (
                 <span>{value as string}</span>
@@ -154,7 +156,10 @@ const Search = () => {
 
   return (
     <div id="search" className="p-4">
-      <h1>Index</h1>
+      <div className="mb-6">
+        Fetching from{" "}
+        <pre className="inline bg-[#dbdbdb] p-2 rounded-md">{items_file}</pre>
+      </div>
       <input ref={searchInput} type="text" onChange={handleInputChange} />
       <div id="names">{renderNames()}</div>
     </div>
