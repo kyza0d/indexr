@@ -83,23 +83,36 @@ const Search = () => {
 
     const renderResultItem = (item: Item, result?: Record<string, any>) => {
       return (
-        <div id="result">
+        <div id="result" className="relative  border border-gray-400">
           {config.thumbnail && (
-            <div>
+            <div className="px-3">
               <span
                 className="icon"
                 dangerouslySetInnerHTML={{ __html: `&#x${item[config.thumbnail]};` }}
               ></span>
             </div>
           )}
-
           {Object.entries(item).map(([key, value]) => (
             <div key={key}>
-              <strong>{key}: </strong>
-              {key === "id" && result ? (
-                <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
+              {key === "id" ? (
+                <div
+                  className="-top-10 absolute p-2 bg-gray-300 px-3 w-full outline outline-1 outline-gray-400"
+                  id="title"
+                >
+                  <strong>{key}: </strong>
+                  {result ? (
+                    <span
+                      dangerouslySetInnerHTML={{ __html: highlightMatches(result) }}
+                    />
+                  ) : (
+                    <span>{value as string}</span>
+                  )}
+                </div>
               ) : (
-                <span>{value as string}</span>
+                <div className="px-3">
+                  <strong>{key}: </strong>
+                  <span>{value as string}</span>
+                </div>
               )}
             </div>
           ))}
@@ -155,15 +168,19 @@ const Search = () => {
   }, 200);
 
   return (
-    <div id="search" className="p-4">
+    <main>
       <h2 className="mb-12">Indexable.dev</h2>
-      <div className="mb-6">
-        Fetching from{" "}
-        <pre className="inline bg-[#dbdbdb] p-2 rounded-md">{items_file}</pre>
+      <div id="search">
+        <nav id="controls">
+          <div className="mb-6">
+            Fetching from{" "}
+            <pre className="inline bg-[#dbdbdb] p-2 rounded-md">{items_file}</pre>
+          </div>
+          <input ref={searchInput} type="text" onChange={handleInputChange} />
+        </nav>
+        <div id="names">{renderNames()}</div>
       </div>
-      <input ref={searchInput} type="text" onChange={handleInputChange} />
-      <div id="names">{renderNames()}</div>
-    </div>
+    </main>
   );
 };
 

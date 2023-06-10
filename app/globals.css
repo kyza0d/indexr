@@ -10,7 +10,7 @@ body {
 
 .icon {
   font-family: "Symbols Nerd Font", sans-serif;
-  font-size: 1.8em;
+  font-size: 2.8em;
   color: #222222;
   padding-right: 12px;
 }
@@ -32,18 +32,40 @@ h2 {
   border: 1px solid #b2b2b2;
 }
 
-#search  {
+#title {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+main  {
   max-width: 70vw;
   margin: 0 auto;
   margin-top: 10vh;
   min-height: 70vh;
 }
+
+#names {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 60px;
+  row-gap: 60px
+}
 #result {
-  margin-top: 12px;
   background: #eaeaea;
-  border-radius: 6px;
-  border: 1px solid #b2b2b2;
-  padding: 12px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  min-height: 150px;
+  padding-bottom: 12px;
+  padding-top: 12px
+}
+
+#controls {
+  position: sticky;
+  background: #ffffff;
+  top: 0px;
+  z-index: 10;
+  padding: 12px 0 ;
 }
 
 #search input {
@@ -51,6 +73,9 @@ h2 {
   padding: 11px 9px;
 }
 
+#search input:focus {
+  outline: 1px solid #7f7f7f;
+}
 
 mark {
   position: relative;
