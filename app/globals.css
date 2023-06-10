@@ -11,6 +11,7 @@ body {
 .icon {
   font-family: "Symbols Nerd Font", sans-serif;
   font-size: 1.8em;
+  color: #222222;
   padding-right: 12px;
 }
 
@@ -22,8 +23,8 @@ strong {
 font-weight: 600;
 }
 
-h1 {
-  font-size: 2.2em;
+h2 {
+  font-size: 1.6em;
   font-weight: 600;
 }
 
@@ -34,7 +35,7 @@ h1 {
 #search  {
   max-width: 70vw;
   margin: 0 auto;
-  margin-top: 20vh;
+  margin-top: 10vh;
   min-height: 70vh;
 }
 #result {

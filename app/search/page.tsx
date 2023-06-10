@@ -72,7 +72,7 @@ const Search = () => {
   useEffect(() => {
     fuse.current = new Fuse(names, {
       keys: ["id"],
-      threshold: 0.2,
+      threshold: 0.25,
       includeMatches: true,
     });
   }, [names]);
@@ -156,6 +156,7 @@ const Search = () => {
 
   return (
     <div id="search" className="p-4">
+      <h2 className="mb-12">Indexable.dev</h2>
       <div className="mb-6">
         Fetching from{" "}
         <pre className="inline bg-[#dbdbdb] p-2 rounded-md">{items_file}</pre>
