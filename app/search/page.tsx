@@ -4,17 +4,21 @@ import React, { useRef, useState, useEffect, ChangeEvent } from "react";
 import Fuse from "fuse.js";
 import { debounce } from "@/utils";
 
+// Interface for the item object
 interface Item {
   [key: string]: string;
 }
 
+// Configuration options
 const config = {
-  thumbnailKey: "code",
-  show_keys: true,
+  thumbnailKey: "code", // Key for the thumbnail property
+  showKey: true, // Whether to show the key in the rendered results
 };
 
+// File path for the items data
 const items_file = "/glyphnames.json";
 
+// Function to load the items data from the file
 const loadItems = async (): Promise<Item[]> => {
   try {
     const response = await fetch(items_file);
@@ -46,6 +50,7 @@ const Search = () => {
   const fuse = useRef<Fuse<Item> | null>(null);
 
   useEffect(() => {
+    // Initialize the Fuse instance when the names data changes
     fuse.current = new Fuse(names, {
       keys: ["id"],
       threshold: 0.25,
@@ -54,14 +59,17 @@ const Search = () => {
   }, [names]);
 
   useEffect(() => {
+    // Load the names data on component mount
     loadNames();
   }, []);
 
+  // Render the list of names based on the current search query and displayed items count
   const renderNames = () => {
     const results = fuse.current?.search(query) ?? [];
     const renderedResults = [];
 
     if (query && query.length >= 2) {
+      // Render search results with query highlighting
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
         const result = results[i];
         const item = result.item;
@@ -70,6 +78,7 @@ const Search = () => {
 
       renderedResults.push(renderLoadMore(results.length));
     } else {
+      // Render initial names with load more option
       const namesToRender = names.slice(0, displayedItemsCount);
 
       for (let i = 0; i < namesToRender.length; i++) {
@@ -83,6 +92,7 @@ const Search = () => {
     return renderedResults;
   };
 
+  // Render an individual result item
   const renderResultItem = (item: Item, result?: Record<string, any>) => {
     return (
       <div id="result" className="relative  border border-gray-400">
@@ -97,11 +107,12 @@ const Search = () => {
         {Object.entries(item).map(([key, value]) => (
           <div key={key}>
             {key === "id" ? (
+              // Render the title with optional key and query highlighting
               <div
                 className="-top-8 absolute p-2 px-3 w-full outline outline-1 outline-gray-400"
                 id="title"
               >
-                {config.show_keys && <strong>{key}: </strong>}
+                {config.showKey && <strong>{key}: </strong>}
                 {result ? (
                   <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
                 ) : (
@@ -109,8 +120,9 @@ const Search = () => {
                 )}
               </div>
             ) : (
+              // Render other key-value pairs
               <div className="px-3">
-                {config.show_keys && <strong>{key}: </strong>}
+                {config.showKey && <strong>{key}: </strong>}
                 <span>{value as string}</span>
               </div>
             )}
@@ -120,6 +132,7 @@ const Search = () => {
     );
   };
 
+  // Highlight the matched portions of the item's name
   const highlightMatches = ({ item, matches }: any) => {
     let highlightedText = "";
     let lastIndex = 0;
@@ -139,6 +152,7 @@ const Search = () => {
     return highlightedText;
   };
 
+  // Render the load more button if there are more items to load
   const renderLoadMore = (count: number) => {
     if (count > displayedItemsCount) {
       return (
@@ -157,15 +171,18 @@ const Search = () => {
     return null;
   };
 
+  // Load more items when the load more button is clicked
   const loadMoreItems = () => {
     setDisplayedItemsCount(displayedItemsCount + 100);
   };
 
+  // Load the names data from the file
   const loadNames = async () => {
     const items = await loadItems();
     setNames(items);
   };
 
+  // Handle input change with debounce to delay search query updates
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
