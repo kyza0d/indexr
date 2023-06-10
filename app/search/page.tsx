@@ -36,20 +36,16 @@ const loadItems = async (): Promise<Item[]> => {
       throw new Error("Invalid JSON format");
     }
   } catch (error) {
-    // console.error("Failed to load items:", error);
+    console.error("Failed to load items:", error);
     return [];
   }
 };
 
-const maxDisplayedItems = 200;
-
-const Search = () => {
-  const [names, setNames] = useState<Item[]>([]);
-  const [displayedItemsCount, setDisplayedItemsCount] =
-    useState<number>(maxDisplayedItems);
-  const [query, setQuery] = useState<string>("");
+const Search: React.FC = () => {
+  const displayedItems = 200;
 
   const fuse = useRef<Fuse<Item> | null>(null);
+  const [names, setNames] = useState<Item[]>([]);
 
   useEffect(() => {
     // Initialize the Fuse instance when the names data changes
@@ -65,6 +61,10 @@ const Search = () => {
     loadNames();
   }, []);
 
+  const [query, setQuery] = useState<string>("");
+  const [displayedItemsCount, setDisplayedItemsCount] =
+    useState<number>(displayedItems);
+
   // Render the list of names based on the current search query and displayed items count
   const renderNames = () => {
     const results = fuse.current?.search(query) ?? [];
@@ -75,7 +75,9 @@ const Search = () => {
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
         const result = results[i];
         const item = result.item;
-        renderedResults.push(<div key={item.id}>{renderResultItem(item, result)}</div>);
+        renderedResults.push(
+          <div key={result.item.id}>{renderResultItem(item, result)}</div>
+        );
       }
 
       renderedResults.push(renderLoadMore(results.length));
@@ -102,7 +104,9 @@ const Search = () => {
           <div className="px-3">
             <span
               className="icon"
-              dangerouslySetInnerHTML={{ __html: `&#x${item[config.thumbnailKey]};` }}
+              dangerouslySetInnerHTML={{
+                __html: `&#x${item[config.thumbnailKey]};`,
+              }}
             ></span>
           </div>
         )}
@@ -117,7 +121,11 @@ const Search = () => {
               >
                 {config.showKey && <strong>{key}: </strong>}
                 {result ? (
-                  <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: highlightMatches(result),
+                    }}
+                  />
                 ) : (
                   <span>{value as string}</span>
                 )}
@@ -160,6 +168,7 @@ const Search = () => {
     if (count > displayedItemsCount) {
       return (
         <nav id="load-more" key="load-more">
+          {/* Add key prop to nav element */}
           <p key="more">{`${count - displayedItemsCount} more items...`}</p>
           <button
             onClick={loadMoreItems}
@@ -189,16 +198,17 @@ const Search = () => {
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
-  }, maxDisplayedItems);
+  }, 200);
 
-  const searchInput = useRef<HTMLInputElement>(null);
+  const searchInput = useRef<HTMLInputElement | null>(null);
 
   return (
     <main>
       <div id="search">
         <nav id="controls">
           <div className="mb-6">
-            Fetching from <pre className="inline p-2 rounded-md">{items_file}</pre>
+            Fetching from{" "}
+            <pre className="inline p-2 rounded-md">{items_file}</pre>
           </div>
           <input ref={searchInput} type="text" onChange={handleInputChange} />
         </nav>
