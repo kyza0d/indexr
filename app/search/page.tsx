@@ -9,7 +9,8 @@ interface Item {
 }
 
 const config = {
-  thumbnail: "code",
+  thumbnailKey: "code",
+  show_keys: true,
 };
 
 const items_file = "/glyphnames.json";
@@ -38,34 +39,9 @@ const loadItems = async (): Promise<Item[]> => {
 };
 
 const Search = () => {
-  const searchInput = useRef<HTMLInputElement>(null);
-
   const [names, setNames] = useState<Item[]>([]);
   const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(200);
   const [query, setQuery] = useState<string>("");
-
-  const highlightMatches = ({ item, matches }: any) => {
-    let highlightedText = "";
-    let lastIndex = 0;
-
-    matches.forEach(({ indices }: any) => {
-      indices.forEach(([start, end]: number[]) => {
-        const beforeMatch = item.id.slice(lastIndex, start);
-        const matchedText = item.id.slice(start, end + 1);
-        if (matchedText.toLowerCase() === searchInput.current?.value.toLowerCase()) {
-          highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
-          lastIndex = end + 1;
-        }
-      });
-
-      highlightedText += item.id.slice(lastIndex);
-    });
-    return highlightedText;
-  };
-
-  const loadMoreItems = () => {
-    setDisplayedItemsCount(displayedItemsCount + 100);
-  };
 
   const fuse = useRef<Fuse<Item> | null>(null);
 
@@ -77,60 +53,13 @@ const Search = () => {
     });
   }, [names]);
 
+  useEffect(() => {
+    loadNames();
+  }, []);
+
   const renderNames = () => {
     const results = fuse.current?.search(query) ?? [];
     const renderedResults = [];
-
-    const renderResultItem = (item: Item, result?: Record<string, any>) => {
-      return (
-        <div id="result" className="relative  border border-gray-400">
-          {config.thumbnail && (
-            <div className="px-3">
-              <span
-                className="icon"
-                dangerouslySetInnerHTML={{ __html: `&#x${item[config.thumbnail]};` }}
-              ></span>
-            </div>
-          )}
-          {Object.entries(item).map(([key, value]) => (
-            <div key={key}>
-              {key === "id" ? (
-                <div
-                  className="-top-10 absolute p-2 bg-gray-300 px-3 w-full outline outline-1 outline-gray-400"
-                  id="title"
-                >
-                  <strong>{key}: </strong>
-                  {result ? (
-                    <span
-                      dangerouslySetInnerHTML={{ __html: highlightMatches(result) }}
-                    />
-                  ) : (
-                    <span>{value as string}</span>
-                  )}
-                </div>
-              ) : (
-                <div className="px-3">
-                  <strong>{key}: </strong>
-                  <span>{value as string}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    };
-
-    const renderLoadMore = (count: number) => {
-      if (count > displayedItemsCount) {
-        return [
-          <p key="more">{`${count - displayedItemsCount} more items...`}</p>,
-          <button onClick={loadMoreItems} key="load-more">
-            Load more
-          </button>,
-        ];
-      }
-      return null;
-    };
 
     if (query && query.length >= 2) {
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
@@ -154,27 +83,102 @@ const Search = () => {
     return renderedResults;
   };
 
-  useEffect(() => {
-    const loadNames = async () => {
-      const items = await loadItems();
-      setNames(items);
-    };
-    loadNames();
-  }, []);
+  const renderResultItem = (item: Item, result?: Record<string, any>) => {
+    return (
+      <div id="result" className="relative  border border-gray-400">
+        {config.thumbnailKey && (
+          <div className="px-3">
+            <span
+              className="icon"
+              dangerouslySetInnerHTML={{ __html: `&#x${item[config.thumbnailKey]};` }}
+            ></span>
+          </div>
+        )}
+        {Object.entries(item).map(([key, value]) => (
+          <div key={key}>
+            {key === "id" ? (
+              <div
+                className="-top-8 absolute p-2 px-3 w-full outline outline-1 outline-gray-400"
+                id="title"
+              >
+                {config.show_keys && <strong>{key}: </strong>}
+                {result ? (
+                  <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
+                ) : (
+                  <span>{value as string}</span>
+                )}
+              </div>
+            ) : (
+              <div className="px-3">
+                {config.show_keys && <strong>{key}: </strong>}
+                <span>{value as string}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const highlightMatches = ({ item, matches }: any) => {
+    let highlightedText = "";
+    let lastIndex = 0;
+
+    matches.forEach(({ indices }: any) => {
+      indices.forEach(([start, end]: number[]) => {
+        const beforeMatch = item.id.slice(lastIndex, start);
+        const matchedText = item.id.slice(start, end + 1);
+        if (matchedText.toLowerCase() === searchInput.current?.value.toLowerCase()) {
+          highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
+          lastIndex = end + 1;
+        }
+      });
+
+      highlightedText += item.id.slice(lastIndex);
+    });
+    return highlightedText;
+  };
+
+  const renderLoadMore = (count: number) => {
+    if (count > displayedItemsCount) {
+      return (
+        <nav id="load-more">
+          <p key="more">{`${count - displayedItemsCount} more items...`}</p>
+          <button
+            onClick={loadMoreItems}
+            key="load-more"
+            className="px-6 py-2 border border-gray-400 rounded-md"
+          >
+            Load more
+          </button>
+        </nav>
+      );
+    }
+    return null;
+  };
+
+  const loadMoreItems = () => {
+    setDisplayedItemsCount(displayedItemsCount + 100);
+  };
+
+  const loadNames = async () => {
+    const items = await loadItems();
+    setNames(items);
+  };
 
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
   }, 200);
 
+  const searchInput = useRef<HTMLInputElement>(null);
+
   return (
     <main>
-      <h2 className="mb-12">Indexable.dev</h2>
       <div id="search">
         <nav id="controls">
           <div className="mb-6">
-            Fetching from{" "}
-            <pre className="inline bg-[#dbdbdb] p-2 rounded-md">{items_file}</pre>
+            Fetching from <pre className="inline p-2 rounded-md">{items_file}</pre>
           </div>
           <input ref={searchInput} type="text" onChange={handleInputChange} />
         </nav>

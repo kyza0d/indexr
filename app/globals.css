@@ -33,12 +33,33 @@ h2 {
 }
 
 #title {
+  overflow: hidden;
+  height: 31px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
 }
 
+#load-more {
+  width: 100%;
+  display: flex;
+  position: relative;
+  grid-column-start: 1;
+  grid-column-end: 5;
+  padding-bottom: 12px;
+}
+
+#load-more p  {
+  position: absolute;
+}
+
+#load-more button {
+  margin: 0 auto;
+}
+
 main  {
-  max-width: 70vw;
+  max-width: 80vw;
   margin: 0 auto;
   margin-top: 10vh;
   min-height: 70vh;
@@ -46,16 +67,16 @@ main  {
 
 #names {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  font-size: 12px;
   margin-top: 60px;
   row-gap: 60px
 }
 #result {
-  background: #eaeaea;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
-  min-height: 150px;
+  min-height: 80px;
   padding-bottom: 12px;
   padding-top: 12px
 }
