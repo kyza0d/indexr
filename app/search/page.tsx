@@ -23,7 +23,6 @@ const loadItems = async (): Promise<Item[]> => {
   try {
     const response = await fetch(items_file);
     const jsonData = await response.json();
-
     if (Array.isArray(jsonData)) {
       return jsonData;
     } else if (typeof jsonData === "object") {
@@ -37,14 +36,17 @@ const loadItems = async (): Promise<Item[]> => {
       throw new Error("Invalid JSON format");
     }
   } catch (error) {
-    console.error("Failed to load items:", error);
+    // console.error("Failed to load items:", error);
     return [];
   }
 };
 
+const maxDisplayedItems = 200;
+
 const Search = () => {
   const [names, setNames] = useState<Item[]>([]);
-  const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(200);
+  const [displayedItemsCount, setDisplayedItemsCount] =
+    useState<number>(maxDisplayedItems);
   const [query, setQuery] = useState<string>("");
 
   const fuse = useRef<Fuse<Item> | null>(null);
@@ -53,7 +55,7 @@ const Search = () => {
     // Initialize the Fuse instance when the names data changes
     fuse.current = new Fuse(names, {
       keys: ["id"],
-      threshold: 0.25,
+      threshold: 0.2,
       includeMatches: true,
     });
   }, [names]);
@@ -73,7 +75,7 @@ const Search = () => {
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
         const result = results[i];
         const item = result.item;
-        renderedResults.push(<div key={i}>{renderResultItem(item, result)}</div>);
+        renderedResults.push(<div key={item.id}>{renderResultItem(item, result)}</div>);
       }
 
       renderedResults.push(renderLoadMore(results.length));
@@ -83,7 +85,7 @@ const Search = () => {
 
       for (let i = 0; i < namesToRender.length; i++) {
         const name = namesToRender[i];
-        renderedResults.push(<div key={i}>{renderResultItem(name)}</div>);
+        renderedResults.push(<div key={name.id}>{renderResultItem(name)}</div>);
       }
 
       renderedResults.push(renderLoadMore(names.length));
@@ -104,8 +106,9 @@ const Search = () => {
             ></span>
           </div>
         )}
+
         {Object.entries(item).map(([key, value]) => (
-          <div key={key}>
+          <div key={`${item.id}-${key}`}>
             {key === "id" ? (
               // Render the title with optional key and query highlighting
               <div
@@ -141,7 +144,7 @@ const Search = () => {
       indices.forEach(([start, end]: number[]) => {
         const beforeMatch = item.id.slice(lastIndex, start);
         const matchedText = item.id.slice(start, end + 1);
-        if (matchedText.toLowerCase() === searchInput.current?.value.toLowerCase()) {
+        if (matchedText.toLowerCase() === query.toLowerCase()) {
           highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
           lastIndex = end + 1;
         }
@@ -156,11 +159,11 @@ const Search = () => {
   const renderLoadMore = (count: number) => {
     if (count > displayedItemsCount) {
       return (
-        <nav id="load-more">
+        <nav id="load-more" key="load-more">
           <p key="more">{`${count - displayedItemsCount} more items...`}</p>
           <button
             onClick={loadMoreItems}
-            key="load-more"
+            key="load-more-button"
             className="px-6 py-2 border border-gray-400 rounded-md"
           >
             Load more
@@ -186,7 +189,7 @@ const Search = () => {
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
-  }, 200);
+  }, maxDisplayedItems);
 
   const searchInput = useRef<HTMLInputElement>(null);
 
