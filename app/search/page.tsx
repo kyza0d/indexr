@@ -4,44 +4,22 @@ import React, { useRef, useState, useEffect, ChangeEvent } from "react";
 import Fuse from "fuse.js";
 import { debounce } from "@/utils";
 
+import { FiSettings } from "react-icons/fi";
+
+import { useSettings } from "@/components/settings";
+import SettingsPane from "@/components/settings";
+
 // Interface for the item object
 interface Item {
   [key: string]: string;
 }
 
-// Configuration options
-const config = {
-  thumbnailKey: "code", // Key for the thumbnail property
-  showKey: true, // Whether to show the key in the rendered results
-};
-
 // File path for the items data
-const items_file = "/glyphnames.json";
+const itemsFile = "/glyphnames.json";
 
 // Function to load the items data from the file
-const loadItems = async (): Promise<Item[]> => {
-  try {
-    const response = await fetch(items_file);
-    const jsonData = await response.json();
-    if (Array.isArray(jsonData)) {
-      return jsonData;
-    } else if (typeof jsonData === "object") {
-      const items: Item[] = [];
-      for (const [key, value] of Object.entries(jsonData)) {
-        const newItem: Item = { id: key, ...(value as Item) };
-        items.push(newItem);
-      }
-      return items;
-    } else {
-      throw new Error("Invalid JSON format");
-    }
-  } catch (error) {
-    console.error("Failed to load items:", error);
-    return [];
-  }
-};
 
-const Search: React.FC = () => {
+const Search = () => {
   const displayedItems = 200;
 
   const fuse = useRef<Fuse<Item> | null>(null);
@@ -62,8 +40,7 @@ const Search: React.FC = () => {
   }, []);
 
   const [query, setQuery] = useState<string>("");
-  const [displayedItemsCount, setDisplayedItemsCount] =
-    useState<number>(displayedItems);
+  const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
 
   // Render the list of names based on the current search query and displayed items count
   const renderNames = () => {
@@ -75,9 +52,7 @@ const Search: React.FC = () => {
       for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
         const result = results[i];
         const item = result.item;
-        renderedResults.push(
-          <div key={result.item.id}>{renderResultItem(item, result)}</div>
-        );
+        renderedResults.push(<div key={result.item.id}>{renderResultItem(item, result)}</div>);
       }
 
       renderedResults.push(renderLoadMore(results.length));
@@ -99,7 +74,7 @@ const Search: React.FC = () => {
   // Render an individual result item
   const renderResultItem = (item: Item, result?: Record<string, any>) => {
     return (
-      <div id="result" className="relative  border border-gray-400">
+      <div id="result" className="relative border border-gray-400">
         {config.thumbnailKey && (
           <div className="px-3">
             <span
@@ -115,10 +90,7 @@ const Search: React.FC = () => {
           <div key={`${item.id}-${key}`}>
             {key === "id" ? (
               // Render the title with optional key and query highlighting
-              <div
-                className="-top-8 absolute p-2 px-3 w-full outline outline-1 outline-gray-400"
-                id="title"
-              >
+              <div className="-top-8 absolute p-2 px-3 w-full outline outline-1 outline-gray-400" id="title">
                 {config.showKey && <strong>{key}: </strong>}
                 {result ? (
                   <span
@@ -168,13 +140,8 @@ const Search: React.FC = () => {
     if (count > displayedItemsCount) {
       return (
         <nav id="load-more" key="load-more">
-          {/* Add key prop to nav element */}
           <p key="more">{`${count - displayedItemsCount} more items...`}</p>
-          <button
-            onClick={loadMoreItems}
-            key="load-more-button"
-            className="px-6 py-2 border border-gray-400 rounded-md"
-          >
+          <button onClick={loadMoreItems} key="load-more-button" className="px-6 py-2 border border-gray-400 rounded-md">
             Load more
           </button>
         </nav>
@@ -186,6 +153,29 @@ const Search: React.FC = () => {
   // Load more items when the load more button is clicked
   const loadMoreItems = () => {
     setDisplayedItemsCount(displayedItemsCount + 100);
+  };
+
+  // Function to load the items data from the file
+  const loadItems = async (): Promise<Item[]> => {
+    try {
+      const response = await fetch(itemsFile);
+      const jsonData = await response.json();
+      if (Array.isArray(jsonData)) {
+        return jsonData;
+      } else if (typeof jsonData === "object") {
+        const items: Item[] = [];
+        for (const [key, value] of Object.entries(jsonData)) {
+          const newItem: Item = { id: key, ...(value as Item) };
+          items.push(newItem);
+        }
+        return items;
+      } else {
+        throw new Error("Invalid JSON format");
+      }
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      return [];
+    }
   };
 
   // Load the names data from the file
@@ -200,19 +190,23 @@ const Search: React.FC = () => {
     setQuery(query);
   }, 200);
 
+  const { config } = useSettings(); // Access the settings context
+
   const searchInput = useRef<HTMLInputElement | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <main>
       <div id="search">
         <nav id="controls">
           <div className="mb-6">
-            Fetching from{" "}
-            <pre className="inline p-2 rounded-md">{items_file}</pre>
+            Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
           </div>
           <input ref={searchInput} type="text" onChange={handleInputChange} />
         </nav>
         <div id="names">{renderNames()}</div>
+        <FiSettings className="settings-icon fixed bottom-10 left-10" onClick={() => setShowSettings(!showSettings)} />
+        {showSettings && <SettingsPane onClose={() => setShowSettings(false)} />}
       </div>
     </main>
   );
