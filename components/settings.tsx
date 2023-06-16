@@ -34,10 +34,15 @@ const SettingsPane = ({ onClose }: { onClose: () => void }) => {
   const [isSaved, setIsSaved] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
+    const { name, checked } = e.target;
 
-    setUpdatedConfig({ ...updatedConfig, [name]: newValue });
+    setUpdatedConfig((prevConfig) => ({
+      ...prevConfig,
+      keys: {
+        ...prevConfig.keys,
+        [name]: checked,
+      },
+    }));
   };
 
   const saveConfig = () => {
@@ -84,6 +89,17 @@ const SettingsPane = ({ onClose }: { onClose: () => void }) => {
             <input type="checkbox" name="showKey" checked={updatedConfig.showKey} onChange={handleChange} />
           </div>
         </div>
+
+        {Object.entries(updatedConfig.keys).map(([key, value]) => (
+          <div key={key} className="mb-2 flex items-center">
+            <label htmlFor={key} className="mr-3">
+              {key}:
+            </label>
+            <div>
+              <input type="checkbox" id={key} name={key} checked={value} onChange={handleChange} />
+            </div>
+          </div>
+        ))}
 
         <button
           onClick={saveConfig}

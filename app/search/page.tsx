@@ -3,30 +3,21 @@
 import React, { useRef, useState, useEffect, ChangeEvent } from "react";
 import Fuse from "fuse.js";
 import { debounce } from "@/utils";
-
 import { FiSettings } from "react-icons/fi";
-
 import { useSettings } from "@/components/settings";
 import SettingsPane from "@/components/settings";
 
-// Interface for the item object
 interface Item {
   [key: string]: string;
 }
 
-// File path for the items data
 const itemsFile = "/glyphnames.json";
 
-// Function to load the items data from the file
-
 const Search = () => {
-  const displayedItems = 200;
-
   const fuse = useRef<Fuse<Item> | null>(null);
   const [names, setNames] = useState<Item[]>([]);
 
   useEffect(() => {
-    // Initialize the Fuse instance when the names data changes
     fuse.current = new Fuse(names, {
       keys: ["id"],
       threshold: 0.2,
@@ -35,43 +26,11 @@ const Search = () => {
   }, [names]);
 
   useEffect(() => {
-    // Load the names data on component mount
     loadNames();
   }, []);
 
-  const [query, setQuery] = useState<string>("");
-  const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
+  const { config, setConfig } = useSettings();
 
-  // Render the list of names based on the current search query and displayed items count
-  const renderNames = () => {
-    const results = fuse.current?.search(query) ?? [];
-    const renderedResults = [];
-
-    if (query && query.length >= 2) {
-      // Render search results with query highlighting
-      for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
-        const result = results[i];
-        const item = result.item;
-        renderedResults.push(<div key={result.item.id}>{renderResultItem(item, result)}</div>);
-      }
-
-      renderedResults.push(renderLoadMore(results.length));
-    } else {
-      // Render initial names with load more option
-      const namesToRender = names.slice(0, displayedItemsCount);
-
-      for (let i = 0; i < namesToRender.length; i++) {
-        const name = namesToRender[i];
-        renderedResults.push(<div key={name.id}>{renderResultItem(name)}</div>);
-      }
-
-      renderedResults.push(renderLoadMore(names.length));
-    }
-
-    return renderedResults;
-  };
-
-  // Render an individual result item
   const renderResultItem = (item: Item, result?: Record<string, any>) => {
     return (
       <div id="result" className="relative border border-gray-400">
@@ -86,36 +45,39 @@ const Search = () => {
           </div>
         )}
 
-        {Object.entries(item).map(([key, value]) => (
-          <div key={`${item.id}-${key}`}>
-            {key === "id" ? (
-              // Render the title with optional key and query highlighting
-              <div className="-top-8 absolute p-2 px-3 w-full outline outline-1 outline-gray-400" id="title">
-                {config.showKey && <strong>{key}: </strong>}
-                {result ? (
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: highlightMatches(result),
-                    }}
-                  />
-                ) : (
+        {Object.entries(item).map(([key, value]) => {
+          if (!config.keys[key]) return null;
+
+          return (
+            <div key={`${item.id}-${key}`}>
+              {key === "id" ? (
+                <div className="px-3">
+                  {config.showKey && <strong>{key}: </strong>}
+                  {result ? (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: highlightMatches(result),
+                      }}
+                    />
+                  ) : (
+                    <span>{value as string}</span>
+                  )}
+                </div>
+              ) : (
+                <div className="px-3">
+                  {config.showKey && <strong>{key}: </strong>}
                   <span>{value as string}</span>
-                )}
-              </div>
-            ) : (
-              // Render other key-value pairs
-              <div className="px-3">
-                {config.showKey && <strong>{key}: </strong>}
-                <span>{value as string}</span>
-              </div>
-            )}
-          </div>
-        ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
 
-  // Highlight the matched portions of the item's name
+  const [query, setQuery] = useState<string>("");
+
   const highlightMatches = ({ item, matches }: any) => {
     let highlightedText = "";
     let lastIndex = 0;
@@ -135,7 +97,9 @@ const Search = () => {
     return highlightedText;
   };
 
-  // Render the load more button if there are more items to load
+  const displayedItems = 200;
+  const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
+
   const renderLoadMore = (count: number) => {
     if (count > displayedItemsCount) {
       return (
@@ -150,22 +114,33 @@ const Search = () => {
     return null;
   };
 
-  // Load more items when the load more button is clicked
-  const loadMoreItems = () => {
-    setDisplayedItemsCount(displayedItemsCount + 100);
-  };
-
-  // Function to load the items data from the file
   const loadItems = async (): Promise<Item[]> => {
     try {
       const response = await fetch(itemsFile);
-      const jsonData = await response.json();
+      const jsonData: unknown = await response.json();
+
       if (Array.isArray(jsonData)) {
-        return jsonData;
+        if (jsonData[0]._id) {
+          const items: Item[] = jsonData.map((item: any) => {
+            const keys = Object.keys(item);
+            const newItem: Item = { id: item._id };
+            keys.forEach((key) => {
+              newItem[key] = typeof item[key] === "object" ? JSON.stringify(item[key]) : item[key];
+            });
+            return newItem;
+          });
+          return items;
+        } else {
+          return jsonData as Item[];
+        }
       } else if (typeof jsonData === "object") {
         const items: Item[] = [];
-        for (const [key, value] of Object.entries(jsonData)) {
-          const newItem: Item = { id: key, ...(value as Item) };
+        for (const [key, value] of Object.entries(jsonData as object)) {
+          const newItem: Item = { id: key };
+          const keys = Object.keys(value);
+          keys.forEach((k) => {
+            newItem[k] = typeof value[k] === "object" ? JSON.stringify(value[k]) : value[k];
+          });
           items.push(newItem);
         }
         return items;
@@ -178,19 +153,57 @@ const Search = () => {
     }
   };
 
-  // Load the names data from the file
   const loadNames = async () => {
     const items = await loadItems();
     setNames(items);
+
+    const keys: { [key: string]: boolean } = {};
+    items.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        keys[key] = true;
+      });
+    });
+
+    setConfig((prevConfig: any[]) => ({
+      ...prevConfig,
+      keys: keys,
+    }));
   };
 
-  // Handle input change with debounce to delay search query updates
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
   }, 200);
 
-  const { config } = useSettings(); // Access the settings context
+  const renderNames = () => {
+    const results = fuse.current?.search(query) ?? [];
+    const renderedResults = [];
+
+    if (query && query.length >= 2) {
+      for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
+        const result = results[i];
+        const item = result.item;
+        renderedResults.push(<div key={result.item.id}>{renderResultItem(item, result)}</div>);
+      }
+
+      renderedResults.push(renderLoadMore(results.length));
+    } else {
+      const namesToRender = names.slice(0, displayedItemsCount);
+
+      for (let i = 0; i < namesToRender.length; i++) {
+        const name = namesToRender[i];
+        renderedResults.push(<div key={name.id}>{renderResultItem(name)}</div>);
+      }
+
+      renderedResults.push(renderLoadMore(names.length));
+    }
+
+    return renderedResults;
+  };
+
+  const loadMoreItems = () => {
+    setDisplayedItemsCount(displayedItemsCount + 100);
+  };
 
   const searchInput = useRef<HTMLInputElement | null>(null);
   const [showSettings, setShowSettings] = useState(false);
