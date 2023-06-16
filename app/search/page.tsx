@@ -158,6 +158,7 @@ const Search = () => {
     setNames(items);
 
     const keys: { [key: string]: boolean } = {};
+
     items.forEach((item) => {
       Object.keys(item).forEach((key) => {
         if (!(key in config.keys)) {

@@ -5,8 +5,6 @@ import React, { ChangeEvent, createContext, useContext, useEffect, useState } fr
 type SettingsContextType = {
   config: any;
   setConfig: React.Dispatch<React.SetStateAction<any>>;
-  keys: any;
-  setKeys: React.Dispatch<React.SetStateAction<any>>;
 };
 
 export const SettingsContext = createContext<SettingsContextType | null>(null);
@@ -49,7 +47,7 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
-    setUpdatedConfig((prevState) => {
+    setUpdatedConfig((prevState: typeof config) => {
       if (name in prevState.keys) {
         return {
           ...prevState,
