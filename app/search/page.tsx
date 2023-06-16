@@ -46,7 +46,7 @@ const Search = () => {
         )}
 
         {Object.entries(item).map(([key, value]) => {
-          if (!config.keys[key]) return null;
+          if (!config.keys[key]) return null; // Use keys here, not updatedKeys
 
           return (
             <div key={`${item.id}-${key}`}>
@@ -160,7 +160,11 @@ const Search = () => {
     const keys: { [key: string]: boolean } = {};
     items.forEach((item) => {
       Object.keys(item).forEach((key) => {
-        keys[key] = true;
+        if (!(key in config.keys)) {
+          keys[key] = true;
+        } else {
+          keys[key] = config.keys[key];
+        }
       });
     });
 
