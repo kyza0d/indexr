@@ -2,18 +2,22 @@
 
 import React, { useRef, useState, useEffect, ChangeEvent } from "react";
 import Fuse from "fuse.js";
-import { debounce } from "@/utils";
 import { FiSettings } from "react-icons/fi";
 import { useSettings } from "@/components/settings";
 import SettingsPane from "@/components/settings";
+
+import { SearchBar } from "@/components/search/SearchBar";
+import { Results } from "@/components/search/Results";
+import { LoadMore } from "@/components/search/LoadMore";
+import { ResultItem } from "@/components/search/ResultItem";
+
+import { debounce } from "@/utils";
 
 interface Item {
   [key: string]: string;
 }
 
-const itemsFile = "/glyphnames.json";
-
-const Search = () => {
+const Search = ({ itemsFile }: { itemsFile: string }) => {
   const fuse = useRef<Fuse<Item> | null>(null);
   const [names, setNames] = useState<Item[]>([]);
 
@@ -30,72 +34,6 @@ const Search = () => {
   }, []);
 
   const { config, setConfig } = useSettings();
-
-  const renderResultItem = (item: Item, result?: Record<string, any>) => {
-    return (
-      <div id="result" className="relative border border-gray-400">
-        {config.thumbnailKey && (
-          <div className="px-3">
-            <span
-              className="icon"
-              dangerouslySetInnerHTML={{
-                __html: `&#x${item[config.thumbnailKey]};`,
-              }}
-            ></span>
-          </div>
-        )}
-
-        {Object.entries(item).map(([key, value]) => {
-          if (!config.keys[key]) return null; // Use keys here, not updatedKeys
-
-          return (
-            <div key={`${item.id}-${key}`}>
-              {key === "id" ? (
-                <div className="px-3">
-                  {config.showKey && <strong>{key}: </strong>}
-                  {result ? (
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: highlightMatches(result),
-                      }}
-                    />
-                  ) : (
-                    <span>{value as string}</span>
-                  )}
-                </div>
-              ) : (
-                <div className="px-3">
-                  {config.showKey && <strong>{key}: </strong>}
-                  <span>{value as string}</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const [query, setQuery] = useState<string>("");
-
-  const highlightMatches = ({ item, matches }: any) => {
-    let highlightedText = "";
-    let lastIndex = 0;
-
-    matches.forEach(({ indices }: any) => {
-      indices.forEach(([start, end]: number[]) => {
-        const beforeMatch = item.id.slice(lastIndex, start);
-        const matchedText = item.id.slice(start, end + 1);
-        if (matchedText.toLowerCase() === query.toLowerCase()) {
-          highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
-          lastIndex = end + 1;
-        }
-      });
-
-      highlightedText += item.id.slice(lastIndex);
-    });
-    return highlightedText;
-  };
 
   const displayedItems = 200;
   const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
@@ -175,40 +113,40 @@ const Search = () => {
     }));
   };
 
+  const loadMoreItems = () => {
+    setDisplayedItemsCount(displayedItemsCount + 100);
+  };
+
+  const [query, setQuery] = useState("");
+
   const handleInputChange = debounce((event: ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setQuery(query);
   }, 200);
 
-  const renderNames = () => {
+  const renderedResults = []; // Use this to store rendered results.
+
+  if (query && query.length >= 2) {
     const results = fuse.current?.search(query) ?? [];
-    const renderedResults = [];
-
-    if (query && query.length >= 2) {
-      for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
-        const result = results[i];
-        const item = result.item;
-        renderedResults.push(<div key={result.item.id}>{renderResultItem(item, result)}</div>);
-      }
-
-      renderedResults.push(renderLoadMore(results.length));
-    } else {
-      const namesToRender = names.slice(0, displayedItemsCount);
-
-      for (let i = 0; i < namesToRender.length; i++) {
-        const name = namesToRender[i];
-        renderedResults.push(<div key={name.id}>{renderResultItem(name)}</div>);
-      }
-
-      renderedResults.push(renderLoadMore(names.length));
+    for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
+      const result = results[i];
+      const item = result.item;
+      renderedResults.push(<ResultItem key={result.item.id} item={item} result={result} config={config} query={query} />);
     }
+    renderedResults.push(
+      <LoadMore count={results.length} loadMoreItems={loadMoreItems} displayedItemsCount={displayedItemsCount} />
+    );
+  } else {
+    const namesToRender = names.slice(0, displayedItemsCount);
 
-    return renderedResults;
-  };
-
-  const loadMoreItems = () => {
-    setDisplayedItemsCount(displayedItemsCount + 100);
-  };
+    for (let i = 0; i < namesToRender.length; i++) {
+      const name = namesToRender[i];
+      renderedResults.push(<ResultItem key={name.id} item={name} config={config} query={query} />);
+    }
+    renderedResults.push(
+      <LoadMore count={names.length} loadMoreItems={loadMoreItems} displayedItemsCount={displayedItemsCount} />
+    );
+  }
 
   const searchInput = useRef<HTMLInputElement | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -216,13 +154,8 @@ const Search = () => {
   return (
     <main>
       <div id="search">
-        <nav id="controls">
-          <div className="mb-6">
-            Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
-          </div>
-          <input ref={searchInput} type="text" onChange={handleInputChange} />
-        </nav>
-        <div id="names">{renderNames()}</div>
+        <SearchBar handleInputChange={handleInputChange} itemsFile={itemsFile} />
+        <Results results={renderedResults} />
         <FiSettings className="settings-icon fixed bottom-10 left-10" onClick={() => setShowSettings(!showSettings)} />
         {showSettings && <SettingsPane onClose={() => setShowSettings(false)} />}
       </div>

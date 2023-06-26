@@ -5,6 +5,8 @@ import React, { ChangeEvent, createContext, useContext, useEffect, useState } fr
 type SettingsContextType = {
   config: any;
   setConfig: React.Dispatch<React.SetStateAction<any>>;
+  keys: any;
+  setKeys: React.Dispatch<React.SetStateAction<any>>;
 };
 
 export const SettingsContext = createContext<SettingsContextType | null>(null);
