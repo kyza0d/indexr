@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, ChangeEvent } from "react";
 
-import { FiSettings } from "react-icons/fi";
+import { FiSettings, FiChevronDown } from "react-icons/fi";
 
 import SettingsPane from "@/components/settings";
 import { useSettings } from "@/components/settings";
@@ -12,11 +12,12 @@ import { Results } from "@/components/search/Results";
 import { LoadMore } from "@/components/search/LoadMore";
 import { ResultItem } from "@/components/search/ResultItem";
 
+import useRetrieveData from "@/hooks/useRetrieveData";
+import useDataHandling from "@/hooks/useDataHandling";
+
 import Fuse from "fuse.js";
 
 import { debounce } from "@/utils";
-import useLoadItems from "@/hooks/useLoadItems";
-import useLoadNames from "@/hooks/useLoadNames";
 
 interface Item {
   [key: string]: string;
@@ -44,8 +45,8 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
   const displayedItems = 200;
   const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
 
-  const { loadItems, error } = useLoadItems(itemsFile);
-  const { uniqueKeys, loadNames } = useLoadNames(loadItems, config, setConfig, setNames);
+  const { loadItems, error } = useRetrieveData(itemsFile);
+  const { uniqueKeys, loadNames } = useDataHandling(loadItems, config, setConfig, setNames);
 
   const loadMoreItems = () => {
     setDisplayedItemsCount(displayedItemsCount + 100);
@@ -58,7 +59,7 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
     setQuery(query);
   }, 200);
 
-  const renderedResults = []; // Use this to store rendered results.
+  const renderedResults = [];
 
   if (query && query.length >= 2) {
     const results = fuse.current?.search(query) ?? [];
@@ -84,11 +85,16 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
     );
   }
 
-  const searchInput = useRef<HTMLInputElement | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
   const handleSearchKeyChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSearchKey(event.target.value);
+  };
+
+  const [isActive, setIsActive] = useState(false);
+
+  const handleSelectToggle = () => {
+    setIsActive(!isActive);
   };
 
   return (
@@ -99,7 +105,12 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
         </div>
         {error && <div className="error-message">Error: {error.message}</div>}
         <div className="flex gap-6 items-start justify-start">
-          <select onChange={handleSearchKeyChange} className="outline outline-1 outline-[#B2B2B2] bg-[#ffffff] px-6 h-12">
+          <select
+            onChange={handleSearchKeyChange}
+            className={`outline outline-1 outline-[#B2B2B2] bg-[#ffffff] px-4 pr-8 h-12 custom-select ${isActive ? "active" : ""
+              }`}
+            onClick={handleSelectToggle}
+          >
             {Array.from(uniqueKeys)
               .filter((key) => config.keys[key])
               .map((key) => (
@@ -108,6 +119,7 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
                 </option>
               ))}
           </select>
+          <FiChevronDown size={24} className="my-auto -ml-12" />
           <SearchBar handleInputChange={handleInputChange} />
         </div>
         <Results results={renderedResults} />

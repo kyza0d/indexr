@@ -8,6 +8,15 @@ body {
   min-height: 100vh;
 }
 
+.custom-select {
+  appearance: none;
+}
+
+.custom-select::-ms-expand {
+  display: none;
+}
+
+
 .icon {
   font-family: "Symbols Nerd Font", sans-serif;
   font-size: 2.8em;
