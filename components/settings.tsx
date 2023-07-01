@@ -2,10 +2,17 @@
 
 import React, { ChangeEvent, createContext, useContext, useEffect, useState } from "react";
 
+type ConfigType = {
+  thumbnailKey: string;
+  showKey: boolean;
+  keys: { [key: string]: string | boolean };
+};
+
 type SettingsContextType = {
-  config: any;
+  config: ConfigType;
   setConfig: React.Dispatch<React.SetStateAction<any>>;
-  keys: any;
+
+  keys: { [key: string]: string };
   setKeys: React.Dispatch<React.SetStateAction<any>>;
 };
 
@@ -26,7 +33,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem("settings", JSON.stringify(config));
   }, [config]);
 
-  return <SettingsContext.Provider value={{ config, setConfig }}>{children}</SettingsContext.Provider>;
+  const [keys, setKeys] = useState<{ [key: string]: string }>({});
+
+  return <SettingsContext.Provider value={{ config, setConfig, keys, setKeys }}>{children}</SettingsContext.Provider>;
 };
 
 export const useSettings = () => {
@@ -39,38 +48,46 @@ export const useSettings = () => {
 
 const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [isSaved, setIsSaved] = useState(false);
+
   const { config, setConfig } = useSettings();
+
   const [updatedConfig, setUpdatedConfig] = useState(config);
 
+  // Synchronize local and global config state
   useEffect(() => {
     setUpdatedConfig(config);
   }, [config]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  // Handler for input changes
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = event.target;
     const newValue = type === "checkbox" ? checked : value;
-    setUpdatedConfig((prevState: typeof config) => {
+    setUpdatedConfig((prevState: ConfigType) => {
+      let updatedState = { ...prevState };
       if (name in prevState.keys) {
-        return {
+        updatedState.keys = { ...prevState.keys, [name]: newValue };
+      } else {
+        updatedState = {
           ...prevState,
-          keys: { ...prevState.keys, [name]: newValue },
+          [name]: newValue,
         };
       }
-      return {
-        ...prevState,
-        [name]: newValue,
-      };
+      return updatedState;
     });
   };
 
+  // Handler for saving config
   const saveConfig = () => {
     setConfig(updatedConfig);
+
     setIsSaved(true);
+
     setTimeout(() => {
       setIsSaved(false);
     }, 2000);
   };
 
+  // Handler for backdrop click
   const handleBackdropClick = (event: React.MouseEvent) => {
     if (event.target === event.currentTarget) {
       onClose();

@@ -1,17 +1,12 @@
 import React, { ChangeEvent } from "react";
-import { debounce } from "@/utils";
 
 interface SearchBarProps {
   handleInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  itemsFile: string;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ handleInputChange, itemsFile }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({ handleInputChange }) => {
   return (
-    <nav id="controls">
-      <div className="mb-6">
-        Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
-      </div>
+    <nav id="controls" className="w-full h-12 my-0">
       <input type="text" onChange={handleInputChange} />
     </nav>
   );

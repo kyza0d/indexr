@@ -1,6 +1,4 @@
-// ResultItem.tsx
-
-import React, { useState } from "react";
+import React from "react";
 
 interface Item {
   [key: string]: string;
@@ -11,27 +9,33 @@ interface ResultItemProps {
   config: any;
   result?: Record<string, any>;
   query: any;
+  searchKey: string;
 }
 
-export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, query }) => {
+export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, query, searchKey }) => {
   const highlightMatches = ({ item, matches }: any) => {
     let highlightedText = "";
     let lastIndex = 0;
 
-    matches.forEach(({ indices }: any) => {
+    matches.forEach(({ indices, key }: any) => {
+      if (key !== searchKey) {
+        return;
+      }
+
       indices.forEach(([start, end]: number[]) => {
-        const beforeMatch = item.id.slice(lastIndex, start);
-        const matchedText = item.id.slice(start, end + 1);
+        const beforeMatch = item[searchKey].slice(lastIndex, start);
+        const matchedText = item[searchKey].slice(start, end + 1);
         if (matchedText.toLowerCase() === query.toLowerCase()) {
           highlightedText += `${beforeMatch}<mark>${matchedText}</mark>`;
           lastIndex = end + 1;
         }
       });
 
-      highlightedText += item.id.slice(lastIndex);
+      highlightedText += item[searchKey].slice(lastIndex);
     });
     return highlightedText;
   };
+
   return (
     <div id="result" className="relative border border-gray-400">
       {config.thumbnailKey && (
@@ -46,11 +50,11 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
       )}
 
       {Object.entries(item).map(([key, value]) => {
-        if (!config.keys[key]) return null; // Use keys here, not updatedKeys
+        if (!config.keys[key]) return null;
 
         return (
           <div key={`${item.id}-${key}`}>
-            {key === "id" ? (
+            {key === searchKey ? (
               <div className="px-3">
                 {config.showKey && <strong>{key}: </strong>}
                 {result ? (
