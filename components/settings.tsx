@@ -2,9 +2,12 @@
 
 import React, { ChangeEvent, createContext, useContext, useEffect, useState } from "react";
 
+const layout_options = ["Grid View", "List View", "Detail View", "Card View", "Table View", "Compact View", "Tile View"];
+
 type ConfigType = {
   thumbnailKey: string;
   showKey: boolean;
+  layout: string;
   keys: { [key: string]: string | boolean };
 };
 
@@ -24,6 +27,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return {
       thumbnailKey: "code",
       showKey: true,
+      layout: "Grid View", // Default layout
       keys: {},
       ...(storedConfig ? JSON.parse(storedConfig) : {}),
     };
@@ -123,6 +127,7 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <h2 className="mt-8">Shown Keys</h2>
 
         <hr className="my-2 border-t border-gray-400" />
+
         {Object.entries(updatedConfig.keys).map(([key, value]) => (
           <div key={key} className="mb-2 flex items-center">
             <label htmlFor={key} className="mr-3">
@@ -133,6 +138,18 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           </div>
         ))}
+
+        <hr className="my-4 border-t border-gray-400" />
+
+        <div className="mb-4">
+          <select name="layout" value={updatedConfig.layout} onChange={handleChange}>
+            {layout_options.map((layout) => (
+              <option key={layout} value={layout}>
+                {layout}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <button
           onClick={saveConfig}

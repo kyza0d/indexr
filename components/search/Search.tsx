@@ -61,6 +61,7 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
 
   const renderedResults = [];
 
+  let loadMoreElement = null;
   if (query && query.length >= 2) {
     const results = fuse.current?.search(query) ?? [];
     for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
@@ -70,17 +71,16 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
         <ResultItem key={result.item.id} item={item} result={result} config={config} query={query} searchKey={searchKey} />
       );
     }
-    renderedResults.push(
+    loadMoreElement = (
       <LoadMore count={results.length} loadMoreItems={loadMoreItems} displayedItemsCount={displayedItemsCount} />
     );
   } else {
     const namesToRender = names.slice(0, displayedItemsCount);
-
     for (let i = 0; i < namesToRender.length; i++) {
       const name = namesToRender[i];
       renderedResults.push(<ResultItem key={name.id} item={name} config={config} query={query} searchKey={searchKey} />);
     }
-    renderedResults.push(
+    loadMoreElement = (
       <LoadMore count={names.length} loadMoreItems={loadMoreItems} displayedItemsCount={displayedItemsCount} />
     );
   }
@@ -93,23 +93,18 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
 
   const [isActive, setIsActive] = useState(false);
 
-  const handleSelectToggle = () => {
-    setIsActive(!isActive);
-  };
-
   return (
     <main>
       <div id="search">
-        <div className="mb-6">
+        <div className="mb-6 pt-8">
           Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
         </div>
         {error && <div className="error-message">Error: {error.message}</div>}
-        <div className="flex gap-6 items-start justify-start">
+        <div className="flex gap-6 items-start justify-start mb-6" id="search-bar">
           <select
             onChange={handleSearchKeyChange}
-            className={`outline outline-1 outline-[#B2B2B2] bg-[#ffffff] px-4 pr-8 h-12 custom-select ${isActive ? "active" : ""
-              }`}
-            onClick={handleSelectToggle}
+            onClick={() => setIsActive(!isActive)}
+            className="outline outline-1 outline-[#B2B2B2] bg-[#ffffff] px-4 pr-8 h-12 -outline-offset-1"
           >
             {Array.from(uniqueKeys)
               .filter((key) => config.keys[key])
@@ -119,10 +114,10 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
                 </option>
               ))}
           </select>
-          <FiChevronDown size={24} className="my-auto -ml-12" />
           <SearchBar handleInputChange={handleInputChange} />
         </div>
         <Results results={renderedResults} />
+        <div>{loadMoreElement}</div>
         <FiSettings className="settings-icon fixed bottom-10 left-10" onClick={() => setShowSettings(!showSettings)} />
         {showSettings && <SettingsPane onClose={() => setShowSettings(false)} />}
       </div>

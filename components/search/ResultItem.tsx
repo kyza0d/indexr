@@ -37,11 +37,11 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
   };
 
   return (
-    <div id="result" className="relative border border-gray-400">
+    <div id="result" className="relative border border-gray-400 p-2">
       {config.thumbnailKey && (
-        <div className="px-3">
+        <div className="mb-1">
           <span
-            className="icon"
+            className="icon text-2xl"
             dangerouslySetInnerHTML={{
               __html: `&#x${item[config.thumbnailKey]};`,
             }}
@@ -55,7 +55,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
         return (
           <div key={`${item.id}-${key}`}>
             {key === searchKey ? (
-              <div className="px-3">
+              <div>
                 {config.showKey && <strong>{key}: </strong>}
                 {result ? (
                   <span
@@ -68,7 +68,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
                 )}
               </div>
             ) : (
-              <div className="px-3">
+              <div>
                 {config.showKey && <strong>{key}: </strong>}
                 <span>{value as string}</span>
               </div>
