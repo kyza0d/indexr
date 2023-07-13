@@ -2,16 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
-
 body {
   min-height: 100vh;
+  color: #1c2023
 }
 
 .icon {
   font-family: "Symbols Nerd Font", sans-serif;
   padding-right: 12px;
-  color: #222222;
 }
 
 #search input {

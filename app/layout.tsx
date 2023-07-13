@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { SettingsProvider } from "@/components/settings";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,10 +12,10 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SettingsProvider>
-      <html lang="en">
-        <body className={`${inter.className} max-w-[70vw] mx-auto`}>{children}</body>
-      </html>
-    </SettingsProvider>
+    <html lang="en">
+      <SettingsProvider>
+        <body className={`${inter.className} max-w-[85vw] mx-auto`}>{children}</body>
+      </SettingsProvider>
+    </html>
   );
 }

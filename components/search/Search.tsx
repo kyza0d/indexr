@@ -25,6 +25,7 @@ interface Item {
 
 const Search = ({ itemsFile }: { itemsFile: string }) => {
   const fuse = useRef<Fuse<Item> | null>(null);
+
   const [names, setNames] = useState<Item[]>([]);
   const [searchKey, setSearchKey] = useState<string>("id");
 
@@ -62,6 +63,7 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
   const renderedResults = [];
 
   let loadMoreElement = null;
+
   if (query && query.length >= 2) {
     const results = fuse.current?.search(query) ?? [];
     for (let i = 0; i < Math.min(displayedItemsCount, results.length); i++) {
@@ -93,8 +95,15 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
 
   const [isActive, setIsActive] = useState(false);
 
+  const [themeClasses, setThemeClasses] = React.useState("text-black bg-white"); // Default theme classes
+
+  React.useLayoutEffect(() => {
+    setThemeClasses(config.theme === "Light" ? "light" : "dark");
+  }, [config.theme]);
+
   return (
-    <main>
+    <main className={`container mx-auto px-4 ${themeClasses}`}>
+      {themeClasses}
       <div id="search">
         <div className="mb-6 pt-8">
           Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
@@ -104,7 +113,7 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
           <select
             onChange={handleSearchKeyChange}
             onClick={() => setIsActive(!isActive)}
-            className="outline outline-1 outline-[#B2B2B2] bg-[#ffffff] px-4 pr-8 h-12 -outline-offset-1"
+            className="outline outline-1 outline-[#B2B2B2] px-4 pr-8 h-12 -outline-offset-1"
           >
             {Array.from(uniqueKeys)
               .filter((key) => config.keys[key])

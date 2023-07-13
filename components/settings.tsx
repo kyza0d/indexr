@@ -1,41 +1,76 @@
 "use client";
 
-import React, { ChangeEvent, createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const layout_options = ["Grid View", "List View", "Detail View", "Card View", "Table View", "Compact View", "Tile View"];
+
+type SettingsContextType = {
+  config: ConfigType;
+  setConfig: React.Dispatch<React.SetStateAction<ConfigType>>;
+
+  keys: { [key: string]: string };
+  setKeys: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
+};
 
 type ConfigType = {
   thumbnailKey: string;
   showKey: boolean;
   layout: string;
+  theme: string; // Added theme property
   keys: { [key: string]: string | boolean };
 };
 
-type SettingsContextType = {
-  config: ConfigType;
-  setConfig: React.Dispatch<React.SetStateAction<any>>;
+export const SettingsContext = createContext<SettingsContextType>({
+  config: {
+    thumbnailKey: "No Thumbnail",
+    layout: "Grid View",
+    showKey: true,
+    theme: "Light", // Add initial theme property
+    keys: {},
+  },
 
-  keys: { [key: string]: string };
-  setKeys: React.Dispatch<React.SetStateAction<any>>;
-};
+  keys: {},
+  setConfig: () => { },
+  setKeys: () => { },
+});
 
-export const SettingsContext = createContext<SettingsContextType | null>(null);
+function useLocalStorage(key: string, initialValue: any) {
+  const [value, setValue] = useState(() => {
+    if (typeof window === "undefined") {
+      return initialValue;
+    }
 
-export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config, setConfig] = useState(() => {
-    const storedConfig = localStorage.getItem("settings");
-    return {
-      thumbnailKey: "code",
-      showKey: true,
-      layout: "Grid View", // Default layout
-      keys: {},
-      ...(storedConfig ? JSON.parse(storedConfig) : {}),
-    };
+    const jsonValue = localStorage.getItem(key);
+    if (jsonValue != null) return JSON.parse(jsonValue);
+    if (typeof initialValue === "function") return initialValue();
+    return initialValue;
   });
 
   useEffect(() => {
-    localStorage.setItem("settings", JSON.stringify(config));
-  }, [config]);
+    if (typeof window !== "undefined" && value !== undefined) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  }, [key, value]);
+
+  return { value, setValue };
+}
+
+export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // inside SettingsProvider
+  const { value: config, setValue: setConfig } = useLocalStorage("settings", {
+    thumbnailKey: "No Thumbnail",
+    showKey: true,
+    layout: "Grid View",
+    theme: "Light", // Add initial theme property
+    keys: {},
+  });
+
+  useEffect(() => {
+    const storedConfig = localStorage.getItem("settings");
+    if (storedConfig) {
+      setConfig(JSON.parse(storedConfig));
+    }
+  }, []);
 
   const [keys, setKeys] = useState<{ [key: string]: string }>({});
 
@@ -54,7 +89,6 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [isSaved, setIsSaved] = useState(false);
 
   const { config, setConfig } = useSettings();
-
   const [updatedConfig, setUpdatedConfig] = useState(config);
 
   // Synchronize local and global config state
@@ -62,10 +96,11 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setUpdatedConfig(config);
   }, [config]);
 
-  // Handler for input changes
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = event.target;
-    const newValue = type === "checkbox" ? checked : value;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = event.target;
+
+    let newValue = event.target instanceof HTMLInputElement && type === "checkbox" ? event.target.checked : value;
+
     setUpdatedConfig((prevState: ConfigType) => {
       let updatedState = { ...prevState };
       if (name in prevState.keys) {
@@ -83,7 +118,6 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   // Handler for saving config
   const saveConfig = () => {
     setConfig(updatedConfig);
-
     setIsSaved(true);
 
     setTimeout(() => {
@@ -100,20 +134,32 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex justify-center items-center z-10"
+      className="fixed top-0 left-0 w-screen h-screen  bg-black/80 flex justify-center items-center z-10"
       onClick={handleBackdropClick}
     >
-      <div className="p-4 bg-white border border-gray-300 rounded shadow w-[60vw] h-[90vh] mt-6">
+      <div className="p-4 border border-gray-300 rounded shadow w-[60vw] h-[90vh] mt-6 bg-white">
         <h1 className="font-medium mb-4">Settings</h1>
 
         <h2>Display Appearance</h2>
 
-        <hr className="my-4 border-t border-gray-400" />
+        <hr className="my-2 mb-4 border-t border-gray-400" />
 
         <div className="mb-2 flex items-center">
           <p>Thumbnail Key:</p>
           <div>
-            <input type="text" name="thumbnailKey" value={updatedConfig.thumbnailKey} onChange={handleChange} />
+            <select
+              name="thumbnailKey"
+              value={updatedConfig.thumbnailKey}
+              onChange={handleChange}
+              className="outline outline-1 outline-[#B2B2B2] px-4 pr-8 h-12 -outline-offset-1 ml-4"
+            >
+              <option value="">No Thumbnail</option> {/* Add this line */}
+              {Object.keys(updatedConfig.keys).map((key) => (
+                <option value={key} key={key}>
+                  {key}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -124,9 +170,9 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         </div>
 
-        <h2 className="mt-8">Shown Keys</h2>
+        <h2 className="mt-8">Shown Keys:</h2>
 
-        <hr className="my-2 border-t border-gray-400" />
+        <hr className="my-2 mb-4 border-t border-gray-400" />
 
         {Object.entries(updatedConfig.keys).map(([key, value]) => (
           <div key={key} className="mb-2 flex items-center">
@@ -139,10 +185,17 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         ))}
 
-        <hr className="my-4 border-t border-gray-400" />
+        <h2 className="mt-8">Layout:</h2>
+
+        <hr className="my-2 mb-4 border-t border-gray-400" />
 
         <div className="mb-4">
-          <select name="layout" value={updatedConfig.layout} onChange={handleChange}>
+          <select
+            name="layout"
+            value={updatedConfig.layout}
+            onChange={handleChange}
+            className="outline outline-1 outline-[#B2B2B2] -outline-offset-1 px-4 pr-8 h-12"
+          >
             {layout_options.map((layout) => (
               <option key={layout} value={layout}>
                 {layout}
@@ -151,14 +204,23 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </select>
         </div>
 
-        <button
-          onClick={saveConfig}
-          className={`px-4 py-2 rounded mr-3 ${isSaved ? "bg-green-500 text-white" : "bg-blue-500 text-white"}`}
-        >
+        <div className="mb-4">
+          <select
+            name="theme"
+            value={updatedConfig.theme}
+            onChange={handleChange}
+            className="outline outline-1 outline-[#B2B2B2] -outline-offset-1 px-4 pr-8 h-12"
+          >
+            <option value="Light">Light</option>
+            <option value="Dark">Dark</option>
+          </select>
+        </div>
+
+        <button onClick={saveConfig} className="px-4 py-3 outline outline-1 outline-[#B2B2B2] -outline-offset-1 mr-4">
           {isSaved ? "Settings saved!" : "Save"}
         </button>
 
-        <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded">
+        <button onClick={onClose} className="px-4 py-3 outline outline-1 outline-[#B2B2B2] -outline-offset-1">
           Close
         </button>
       </div>

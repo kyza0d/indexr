@@ -37,17 +37,19 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
   };
 
   return (
-    <div id="result" className="relative border border-gray-400 p-2">
-      {config.thumbnailKey && (
-        <div className="mb-1">
-          <span
-            className="icon text-2xl"
-            dangerouslySetInnerHTML={{
-              __html: `&#x${item[config.thumbnailKey]};`,
-            }}
-          ></span>
-        </div>
-      )}
+    <div id="result" className="relative border border-gray-300 bg-white p-4">
+      {config.thumbnailKey &&
+        item[config.thumbnailKey] && ( // Check if item has a value for thumbnailKey
+          <div className="mb-3">
+            <span
+              className="icon text-2xl text-black"
+              dangerouslySetInnerHTML={{
+                __html: `${item[config.thumbnailKey]}`,
+                // __html: `&#x${item[config.thumbnailKey]};`,
+              }}
+            ></span>
+          </div>
+        )}
 
       {Object.entries(item).map(([key, value]) => {
         if (!config.keys[key]) return null;
@@ -56,7 +58,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
           <div key={`${item.id}-${key}`}>
             {key === searchKey ? (
               <div>
-                {config.showKey && <strong>{key}: </strong>}
+                {config.showKey && <span>{key}: </span>}
                 {result ? (
                   <span
                     dangerouslySetInnerHTML={{
@@ -69,7 +71,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
               </div>
             ) : (
               <div>
-                {config.showKey && <strong>{key}: </strong>}
+                {config.showKey && <span>{key}: </span>}
                 <span>{value as string}</span>
               </div>
             )}
