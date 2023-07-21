@@ -16,8 +16,8 @@ type ConfigType = {
   thumbnailKey: string;
   showKey: boolean;
   layout: string;
-  theme: string; // Added theme property
-  keys: { [key: string]: string | boolean };
+  theme: string;
+  keys: { [key: string]: any };
 };
 
 export const SettingsContext = createContext<SettingsContextType>({
@@ -25,7 +25,7 @@ export const SettingsContext = createContext<SettingsContextType>({
     thumbnailKey: "No Thumbnail",
     layout: "Grid View",
     showKey: true,
-    theme: "Light", // Add initial theme property
+    theme: "Light",
     keys: {},
   },
 
@@ -134,10 +134,10 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen  bg-black/80 flex justify-center items-center z-10"
+      className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex justify-center items-center z-10"
       onClick={handleBackdropClick}
     >
-      <div className="p-4 border border-gray-300 rounded shadow w-[60vw] h-[90vh] mt-6 bg-white">
+      <div className="p-4 border border-gray-300 dark:border-gray-700 rounded shadow w-[60vw] h-[90vh] mt-10 bg-white dark:bg-[#1C2023]">
         <h1 className="font-medium mb-4">Settings</h1>
 
         <h2>Display Appearance</h2>
@@ -211,8 +211,8 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             onChange={handleChange}
             className="outline outline-1 outline-[#B2B2B2] -outline-offset-1 px-4 pr-8 h-12"
           >
-            <option value="Light">Light</option>
-            <option value="Dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
           </select>
         </div>
 

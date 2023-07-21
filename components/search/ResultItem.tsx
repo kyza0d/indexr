@@ -37,12 +37,12 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
   };
 
   return (
-    <div id="result" className="relative border border-gray-300 bg-white p-4">
+    <div id="result" className="relative p-4 border border-gray-300 dark:border-gray-700 rounded shadow-sm">
       {config.thumbnailKey &&
         item[config.thumbnailKey] && ( // Check if item has a value for thumbnailKey
           <div className="mb-3">
             <span
-              className="icon text-2xl text-black"
+              className="icon text-2xl"
               dangerouslySetInnerHTML={{
                 __html: `${item[config.thumbnailKey]}`,
                 // __html: `&#x${item[config.thumbnailKey]};`,

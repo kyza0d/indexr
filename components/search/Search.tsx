@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect, ChangeEvent } from "react";
+import React, { useRef, useState, useEffect, ChangeEvent, useLayoutEffect } from "react";
 
 import { FiSettings, FiChevronDown } from "react-icons/fi";
 
@@ -42,6 +42,11 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
   }, []);
 
   const { config, setConfig } = useSettings();
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(config.theme);
+  }, [config.theme]);
 
   const displayedItems = 200;
   const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
@@ -95,15 +100,8 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
 
   const [isActive, setIsActive] = useState(false);
 
-  const [themeClasses, setThemeClasses] = React.useState("text-black bg-white"); // Default theme classes
-
-  React.useLayoutEffect(() => {
-    setThemeClasses(config.theme === "Light" ? "light" : "dark");
-  }, [config.theme]);
-
   return (
-    <main className={`container mx-auto px-4 ${themeClasses}`}>
-      {themeClasses}
+    <main className={`px-4`}>
       <div id="search">
         <div className="mb-6 pt-8">
           Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
@@ -113,7 +111,7 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
           <select
             onChange={handleSearchKeyChange}
             onClick={() => setIsActive(!isActive)}
-            className="outline outline-1 outline-[#B2B2B2] px-4 pr-8 h-12 -outline-offset-1"
+            className=" border dark:border-gray-700 border-gray-300 px-4 pr-8 h-12 -outline-offset-1"
           >
             {Array.from(uniqueKeys)
               .filter((key) => config.keys[key])

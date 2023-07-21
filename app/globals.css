@@ -4,16 +4,21 @@
 
 body {
   min-height: 100vh;
-  color: #1c2023
+}
+
+.dark, .dark input, .dark select {
+  background-color: #1c2023;
+  color: #eee;
+}
+
+.light, .light input, .light select {
+  background-color: #eee;
+  color: #1c2023;
 }
 
 .icon {
   font-family: "Symbols Nerd Font", sans-serif;
   padding-right: 12px;
-}
-
-#search input {
-  border: 1px solid #b2b2b2;
 }
 
 #search input {
@@ -27,7 +32,6 @@ body {
 
 mark {
   position: relative;
-  color: white;
   background: transparent;
   z-index: 1;
 }
