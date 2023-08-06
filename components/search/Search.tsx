@@ -19,6 +19,8 @@ import Fuse from "fuse.js";
 
 import { debounce } from "@/utils";
 
+import anime from "animejs";
+
 interface Item {
   [key: string]: string;
 }
@@ -100,6 +102,51 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
 
   const [isActive, setIsActive] = useState(false);
 
+  const searchBarRef = useRef<HTMLDivElement | null>(null);
+  const searchBarInitialPosition = useRef<number | null>(null);
+  let animationTriggered = false;
+
+  useEffect(() => {
+    // Set initial position of the search bar
+    if (searchBarRef.current && searchBarInitialPosition.current === null) {
+      searchBarInitialPosition.current = searchBarRef.current.getBoundingClientRect().top + window.scrollY;
+    }
+
+    const handleResize = () => {
+      if (searchBarRef.current) {
+        searchBarInitialPosition.current = searchBarRef.current.getBoundingClientRect().top + window.scrollY;
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!searchBarRef.current) return;
+
+      const currentScroll = window.scrollY;
+
+      if (currentScroll > (searchBarInitialPosition.current || 0) && !animationTriggered) {
+        animationTriggered = true;
+        searchBarRef.current?.classList.add("search-bar-bottom");
+      } else if (currentScroll < (searchBarInitialPosition.current || 0) && animationTriggered) {
+        animationTriggered = false;
+        searchBarRef.current?.classList.remove("search-bar-bottom");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <main className={`px-4`}>
       <div id="search">
@@ -107,11 +154,11 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
           Fetching from <pre className="inline p-2 rounded-md">{itemsFile}</pre>
         </div>
         {error && <div className="error-message">Error: {error.message}</div>}
-        <div className="flex gap-6 items-start justify-start mb-6" id="search-bar">
+        <div className="flex justify-stretch h-[120px]" id="search-bar" ref={searchBarRef}>
           <select
             onChange={handleSearchKeyChange}
             onClick={() => setIsActive(!isActive)}
-            className=" border dark:border-gray-700 border-gray-300 px-4 pr-8 h-12 -outline-offset-1"
+            className="border dark:border-[#545454] border-gray-300 px-4 my-8"
           >
             {Array.from(uniqueKeys)
               .filter((key) => config.keys[key])

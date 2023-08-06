@@ -137,7 +137,7 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex justify-center items-center z-10"
       onClick={handleBackdropClick}
     >
-      <div className="p-4 border border-gray-300 dark:border-gray-700 rounded shadow w-[60vw] h-[90vh] mt-10 bg-white dark:bg-[#1C2023]">
+      <div className="p-2 border border-gray-300 dark:border-gray-700 rounded shadow w-[60vw] h-[90vh] mt-10 bg-white dark:bg-[#1C2023]">
         <h1 className="font-medium mb-4">Settings</h1>
 
         <h2>Display Appearance</h2>

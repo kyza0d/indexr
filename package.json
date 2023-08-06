@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node ./utils/seed.js"
   },
   "dependencies": {
+    "@types/animejs": "^3.1.7",
     "@types/node": "20.2.5",
     "@types/react": "18.2.8",
     "@types/react-dom": "18.2.4",
+    "animejs": "^3.2.1",
     "autoprefixer": "10.4.14",
+    "faker": "^6.6.6",
     "fuse.js": "^6.6.2",
     "lodash": "^4.17.21",
     "next": "13.4.4",
@@ -25,6 +29,7 @@
     "typescript": "5.1.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.0.2",
     "@types/lodash": "^4.14.195"
   }
 }

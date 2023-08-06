@@ -6,8 +6,8 @@ interface SearchBarProps {
 
 export const SearchBar: React.FC<SearchBarProps> = ({ handleInputChange }) => {
   return (
-    <nav id="controls" className="w-full h-12 my-0 border dark:border-gray-700 border-gray-300">
-      <input type="text" onChange={handleInputChange} />
+    <nav id="bar" className="w-full flex justify-stretch my-8 border dark:border-[#545454]">
+      <input className="px-2" type="text" onChange={handleInputChange} />
     </nav>
   );
 };

@@ -37,7 +37,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, qu
   };
 
   return (
-    <div id="result" className="relative p-4 border border-gray-300 dark:border-gray-700 rounded shadow-sm">
+    <div id="result" className="relative p-3 border border-gray-300 dark:border-[#545454] shadow-sm">
       {config.thumbnailKey &&
         item[config.thumbnailKey] && ( // Check if item has a value for thumbnailKey
           <div className="mb-3">

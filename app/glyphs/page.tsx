@@ -3,7 +3,7 @@ import React from "react";
 
 const Glyphs = () => {
   return (
-    <main>
+    <main className="font-[Symbols Nerd Font]">
       <Search itemsFile="glyphnames.json" />
     </main>
   );
