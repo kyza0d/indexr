@@ -16,7 +16,7 @@ type ConfigType = {
   thumbnailKey: string;
   showKey: boolean;
   layout: string;
-  theme: string;
+  theme: string; // Add theme property
   keys: { [key: string]: any };
 };
 
@@ -56,14 +56,23 @@ function useLocalStorage(key: string, initialValue: any) {
 }
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // inside SettingsProvider
-  const { value: config, setValue: setConfig } = useLocalStorage("settings", {
-    thumbnailKey: "No Thumbnail",
-    showKey: true,
-    layout: "Grid View",
-    theme: "Light", // Add initial theme property
-    keys: {},
-  });
+  const initialConfig = (() => {
+    if (typeof window !== "undefined") {
+      const storedConfig = localStorage.getItem("settings");
+      if (storedConfig) {
+        return JSON.parse(storedConfig);
+      }
+    }
+    return {
+      thumbnailKey: "No Thumbnail",
+      showKey: true,
+      layout: "Grid View",
+      theme: "light",
+      keys: {},
+    };
+  })();
+
+  const { value: config, setValue: setConfig } = useLocalStorage("settings", initialConfig);
 
   useEffect(() => {
     const storedConfig = localStorage.getItem("settings");
@@ -79,13 +88,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useSettings = () => {
   const context = useContext(SettingsContext);
+
   if (!context) {
     throw new Error("useSettings must be used within a SettingsProvider");
   }
+
   return context;
 };
 
+import { useTheme } from "./theme";
+
 const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [theme, setTheme] = useTheme();
+
   const [isSaved, setIsSaved] = useState(false);
 
   const { config, setConfig } = useSettings();
@@ -207,8 +222,8 @@ const SettingsPane: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="mb-4">
           <select
             name="theme"
-            value={updatedConfig.theme}
-            onChange={handleChange}
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
             className="outline outline-1 outline-[#B2B2B2] -outline-offset-1 px-4 pr-8 h-12"
           >
             <option value="light">Light</option>

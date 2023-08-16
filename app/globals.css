@@ -14,6 +14,11 @@ body {
   color: #B8B8B8;
 }
 
+.light, .light input, .light select {
+  background-color: #eee;
+  color: #1c2023;
+}
+
 .search-bar-bottom {
   position: fixed;
   gap: 16px;
@@ -28,10 +33,6 @@ body {
   margin-left: 17px;
 }
 
-.light, .light input, .light select {
-  background-color: #eee;
-  color: #1c2023;
-}
 
 .icon {
   font-family: "Symbols Nerd Font", sans-serif;

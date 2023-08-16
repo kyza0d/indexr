@@ -6,6 +6,7 @@ import { FiSettings, FiChevronDown } from "react-icons/fi";
 
 import SettingsPane from "@/components/settings";
 import { useSettings } from "@/components/settings";
+# hello
 
 import { SearchBar } from "@/components/search/SearchBar";
 import { Results } from "@/components/search/Results";
@@ -18,8 +19,6 @@ import useDataHandling from "@/hooks/useDataHandling";
 import Fuse from "fuse.js";
 
 import { debounce } from "@/utils";
-
-import anime from "animejs";
 
 interface Item {
   [key: string]: string;
@@ -44,11 +43,6 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
   }, []);
 
   const { config, setConfig } = useSettings();
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(config.theme);
-  }, [config.theme]);
 
   const displayedItems = 200;
   const [displayedItemsCount, setDisplayedItemsCount] = useState<number>(displayedItems);
