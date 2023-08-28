@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSettings } from "@/components/settings";
+import { useSettings } from "@/components/settings/SettingsContext";
 
 interface ResultsProps {
   results: JSX.Element[];
