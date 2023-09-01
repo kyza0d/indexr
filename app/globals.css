@@ -4,9 +4,9 @@
 
 body {
   min-height: 100vh;
-  font-family: "Cartograph CF", monospace;
   font-size: 14px;
   line-height: 1.8;
+  padding-bottom: 80px
 }
 
 .dark, .dark input, .dark select {
@@ -53,20 +53,10 @@ body {
   outline: 1px solid #7f7f7f;
 }
 
-/* #search-bar.sticky { */
-/*     position: fixed; */
-/*     bottom: 0; */
-/*     left: 0; */
-/*     right: 0; */
-/*     z-index: 100; /* To ensure it stays on top of other content */ */
-/*     background-color: white; /* Or whatever background color fits your design */ */
-/* } */
-
-
 mark {
   position: relative;
-  background: transparent;
-  color: #749AEB;
+  background: yellow;
+  color: #000000;
   z-index: 1;
 }
 

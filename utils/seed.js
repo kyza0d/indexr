@@ -1,8 +1,9 @@
-import { faker } from "@faker-js/faker";
-import path from "path";
-import * as fs from "node:fs";
+const faker = require("@faker-js/faker").faker;
 
-const generateUsers = (count = 300) => {
+const path = require("path");
+const fs = require("fs");
+
+const generateUsers = (count = 30000) => {
   const users = [];
   for (let i = 0; i < count; i++) {
     users.push({

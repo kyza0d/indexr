@@ -1,7 +1,12 @@
 "use client";
 
-import { SettingsProvider } from "@/components/settings/SettingsProvider";
+import { SettingsProvider } from "@/components/settings/provider";
+import { ThemeProvider } from "next-themes";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <SettingsProvider>{children}</SettingsProvider>;
+  return (
+    <ThemeProvider attribute="class">
+      <SettingsProvider>{children}</SettingsProvider>
+    </ThemeProvider>
+  );
 }
