@@ -9,8 +9,9 @@ export type SettingsContextType = {
 
 export type ConfigType = {
   thumbnailKey: string;
-  thumbnailType: "plain-text" | "url";
+  thumbnailType: "text" | "image";
   showKey: boolean;
+  searchKey: string | null;
   layout: string;
   theme: string;
   keys: { [key: string]: unknown };

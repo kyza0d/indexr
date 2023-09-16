@@ -3,10 +3,11 @@ import { ConfigType, SettingsContextType } from "@/types";
 
 export const initialSettings: ConfigType = {
   thumbnailKey: "No Thumbnail",
-  thumbnailType: "plain-text",
+  thumbnailType: "text",
 
   layout: "Grid View",
   showKey: true,
+  searchKey: "id",
   theme: "Light",
   keys: {},
 };

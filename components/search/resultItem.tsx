@@ -17,13 +17,7 @@ interface ResultItemProps {
   searchKey: string;
 }
 
-export const ResultItem: React.FC<ResultItemProps> = ({
-  item,
-  config,
-  result,
-  query,
-  searchKey,
-}) => {
+export const ResultItem: React.FC<ResultItemProps> = ({ item, config, result, query, searchKey }) => {
   // Function to highlight the matches
   const highlightMatches = ({ item, matches }: any) => {
     let highlightedText = "";
@@ -66,15 +60,20 @@ export const ResultItem: React.FC<ResultItemProps> = ({
   const thumbnail = getThumbnailType();
 
   return (
-    <div
-      id="result"
-      className="relative p-3 border border-gray-300 dark:border-[#545454] shadow-sm"
-    >
+    <div id="result" className="relative p-3 border border-gray-300 dark:border-[#545454] shadow-sm">
       {config.thumbnailKey && item[config.thumbnailKey] && (
         <div className="mb-3">
           {thumbnail && config.thumbnailType === "image" ? (
-            <img src={thumbnail} alt="Thumbnail" className="w-20" />
+            <Image
+              src={thumbnail}
+              alt="Thumbnail"
+              className="w-20"
+              width={200}
+              height={200}
+              onError={(e) => console.error(e.target.id)}
+            />
           ) : (
+            // <img src={thumbnail} alt="Thumbnail" className="w-20" />
             <span className="icon text-2xl">{thumbnail}</span>
           )}
         </div>
@@ -89,9 +88,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({
           <div key={`${item.id}-${key}`}>
             {config.showKey && <span>{key}: </span>}
             {isSearchKey && result ? (
-              <span
-                dangerouslySetInnerHTML={{ __html: highlightMatches(result) }}
-              />
+              <span dangerouslySetInnerHTML={{ __html: highlightMatches(result) }} />
             ) : (
               <span>{value}</span>
             )}
