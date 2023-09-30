@@ -2,13 +2,11 @@
 
 import { useRef, useState, useEffect, ChangeEvent, useMemo } from "react";
 
-import SettingsWindow from "@/components/settings/settingsWindow";
+import SettingsWindow from "@/components/settings/window";
 import { useSettings } from "@/components/settings/context";
 
-import { SearchBar } from "@/components/search/searchBar";
-import { Results } from "@/components/search/results";
-import { LoadMore } from "@/components/search/loadMore";
-import { ResultItem } from "@/components/search/resultItem";
+import { SearchInput } from "@/components/search/input";
+import { ResultsList, ResultItem } from "@/components/search/results";
 
 import useRetrieveData from "@/hooks/useRetrieveData";
 import useDataHandling from "@/hooks/useDataHandling";
@@ -22,6 +20,25 @@ import Fuse from "fuse.js";
 interface Item {
   [key: string]: string;
 }
+
+interface LoadMoreProps {
+  count: number;
+  loadMoreItems: () => void;
+  displayedItemsCount: number;
+}
+
+const LoadMore: React.FC<LoadMoreProps> = ({ count, loadMoreItems, displayedItemsCount }) => {
+  if (count > displayedItemsCount) {
+    return (
+      <nav id="load-more" key="load-more" className="my-6 flex w-full">
+        <p key="more">{`${count - displayedItemsCount} more items...`}</p>
+        <button onClick={loadMoreItems} key="load-more-button" className="mx-auto rounded-lg px-6 py-2">
+          Load more
+        </button>
+      </nav>
+    );
+  }
+};
 
 const Search = ({ itemsFile }: { itemsFile: string }) => {
   const fuse = useRef<Fuse<Item> | null>(null);
@@ -136,20 +153,19 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
   const [isActive, setIsActive] = useState(false);
 
   const searchBarRef = useRef<HTMLDivElement | null>(null);
-  const searchBarInitialPosition = useRef<number | null>(null);
 
   return (
     <main className={`px-4`}>
       <div id="search">
         <div className="mb-6 pt-8">
-          Fetching from <span className="inline p-2 rounded-md">{itemsFile}</span>
+          Fetching from <span className="inline rounded-md p-2">{itemsFile}</span>
         </div>
         {error && <div className="error-message">Error: {error.message}</div>}
-        <div className="flex justify-stretch h-[120px]" id="search-bar" ref={searchBarRef}>
+        <div className="flex h-[120px] justify-stretch gap-2" id="search-bar" ref={searchBarRef}>
           <select
             onChange={handleSearchKeyChange}
             onClick={() => setIsActive(!isActive)}
-            className="border border-gray-400 px-4 my-8"
+            className="my-8 rounded-md border border-neutral-300 bg-neutral-100 px-4 dark:border-neutral-600 dark:bg-neutral-950"
           >
             {Array.from(uniqueKeys)
               .filter((key) => config.keys[key])
@@ -159,12 +175,12 @@ const Search = ({ itemsFile }: { itemsFile: string }) => {
                 </option>
               ))}
           </select>
-          <SearchBar handleInputChange={handleInputChange} />
+          <SearchInput handleInputChange={handleInputChange} />
         </div>
-        <Results results={renderresults} />
+        <ResultsList results={renderresults} />
         <div>{loadMoreElement}</div>
         <FiSettings
-          className="settings-icon fixed top-10 right-10"
+          className="settings-icon fixed right-10 top-10"
           onClick={() => setShowSettings(!showSettings)}
         />
         {showSettings && <SettingsWindow onClose={() => setShowSettings(false)} />}

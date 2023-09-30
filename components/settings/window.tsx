@@ -17,12 +17,12 @@ const layout_options = [
   "Compact View",
   "Tile View",
 ];
-
 const thumbnail_types = ["text", "image"];
 
 const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { config, setConfig } = useSettings();
-  const [updatedConfig, setUpdatedConfig] = useState(config);
+  const [updatedConfig, setUpdatedConfig] = useState<ConfigType>(config);
+  const settingsWindowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (settingsWindowRef.current !== null) {
@@ -111,7 +111,6 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }, [dragging]);
 
-  const settingsWindowRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState({ offsetX: 0, offsetY: 0 });
 
   const handleMouseDown = (event: React.MouseEvent) => {
@@ -156,71 +155,75 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
+  // Sub-components
+  const Dropdown = ({ name, options, value, onChange }: any) => {
+    return (
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="h-10 rounded-md border border-neutral-300 px-4 pr-8 -outline-offset-1 dark:border-neutral-600 dark:bg-neutral-900"
+      >
+        {options.map((option: string) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    );
+  };
+
+  const Checkbox = ({ name, value, onChange }: any) => {
+    return <input type="checkbox" name={name} checked={value} onChange={onChange} />;
+  };
+
   return (
     <>
-      {dragging && <div className="fixed z-10 inset-0" style={{ pointerEvents: "none" }}></div>}
+      {dragging && <div className="fixed inset-0 z-10" style={{ pointerEvents: "none" }}></div>}
 
       <div
         ref={settingsWindowRef}
         style={{ position: "fixed", left: "0", top: "0" }}
-        className="border border-gray-300 dark:border-gray-700 rounded shadow fixed w-[50vw] bg-white dark:bg-[#1C2023] "
+        className="max-h-[70vh] w-[50vw] overflow-scroll rounded-md border border-neutral-300 bg-white shadow dark:border-neutral-600 dark:bg-neutral-950"
       >
         <div
-          className="cursor-move dark:bg-gray-800 bg-gray-400 flex items-center p-2"
+          className="sticky top-0 flex cursor-move items-center rounded-t-md border-b border-neutral-300 bg-gray-200 p-2 dark:border-neutral-600 dark:bg-neutral-900"
           onMouseDown={handleMouseDown}
         >
+          <h4 className="m-0">Settings</h4>
           <button onClick={onClose} className="ml-auto">
-            <IoIosCloseCircleOutline size={30} />
+            <IoIosCloseCircleOutline size={30} className="text-red-500 dark:text-red-400" />
           </button>
         </div>
 
-        <div className="p-4">
-          <h2>Display Appearance</h2>
-
-          <hr className="my-2 mb-4 border-t border-gray-400" />
-
-          <div className="mb-2 flex items-center">
-            <p>Thumbnail Key:</p>
-            <div className="mb-4">
-              <select
-                name="thumbnailKey"
-                value={updatedConfig.thumbnailKey}
-                onChange={handleChange}
-                className="outline outline-1 outline-[#B2B2B2] px-4 pr-8 h-12 -outline-offset-1 ml-4"
-              >
-                <option value="">No Thumbnail</option> {/* Add this line */}
-                {Object.keys(updatedConfig.keys).map((key) => (
-                  <option value={key} key={key}>
-                    {key}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="flex flex-col gap-y-4 px-6 py-4">
+          <h2>Appearance</h2>
+          <hr />
+          <div>
+            <label className="mr-3">Thumbnail Key:</label>
+            <Dropdown
+              name="thumbnailKey"
+              options={Object.keys(updatedConfig.keys)}
+              value={updatedConfig.thumbnailKey}
+              onChange={handleChange}
+            />
           </div>
 
-          <div className="mb-2 flex items-center">
-            <p>Thumbnail Type:</p>
-            <div className="mb-4">
-              <select
-                name="thumbnailType"
-                value={updatedConfig.thumbnailType}
-                onChange={handleChange}
-                className="outline outline-1 outline-[#B2B2B2] px-4 pr-8 h-12 -outline-offset-1 ml-4"
-              >
-                {thumbnail_types.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="mr-3">Thumbnail Type:</label>
+            <Dropdown
+              name="thumbnailType"
+              options={thumbnail_types}
+              value={updatedConfig.thumbnailType}
+              onChange={handleChange}
+            />
           </div>
 
-          <div className="mb-2 flex items-center">
+          <div className="flex items-center">
             <div className="h-full bg-[#888888]"></div>
           </div>
 
-          <div className="mb-4 flex items-center">
+          <div className="flex items-center">
             <p className="mr-3">Show Key:</p>
             <div>
               <input
@@ -232,12 +235,12 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           </div>
 
-          <h2 className="mt-8">Shown Keys:</h2>
+          <h2>Shown Keys:</h2>
 
-          <hr className="my-2 mb-4 border-t border-gray-400" />
+          <hr className="border-t border-gray-400" />
 
           {Object.entries(updatedConfig.keys).map(([key, value]) => (
-            <div key={key} className="mb-2 flex items-center">
+            <div key={key} className="flex items-center">
               <label htmlFor={key} className="mr-3">
                 {key}:
               </label>
@@ -253,16 +256,17 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           ))}
 
-          <h2 className="mt-8">Layout:</h2>
+          <h2>Layout:</h2>
 
-          <hr className="my-2 mb-4 border-t border-gray-400" />
+          <hr className="bord border-ter-gray-400" />
 
-          <div className="mb-4">
+          <div className="flex items-center">
+            <p className="mr-4">View:</p>
             <select
               name="layout"
               value={updatedConfig.layout}
               onChange={handleChange}
-              className="outline outline-1 outline-[#B2B2B2] -outline-offset-1 px-4 pr-8 h-12"
+              className="h-10 max-w-[120px] rounded-md border border-neutral-300 px-4 pr-8 -outline-offset-1 dark:border-neutral-600 dark:bg-neutral-900"
             >
               {layout_options.map((layout) => (
                 <option key={layout} value={layout}>
@@ -272,10 +276,11 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </select>
           </div>
 
-          <div className="mb-4">
+          <div className="flex items-center">
+            <p className="mr-4">Theme:</p>
             <select
               name="theme"
-              className="outline outline-1 outline-[#B2B2B2] -outline-offset-1 px-4 pr-8 h-12"
+              className="h-10 rounded-md border border-neutral-300 px-4 pr-8 -outline-offset-1 dark:border-neutral-600 dark:bg-neutral-900"
             >
               <option onClick={() => setTheme("system")} value="system">
                 System
@@ -291,7 +296,7 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           <button
             onClick={saveConfig}
-            className="px-4 py-3 outline outline-1 outline-[#B2B2B2] -outline-offset-1 mr-4 bg-blue-400 dark:bg-blue-600 px-8"
+            className="h-10 w-fit rounded-md px-4 -outline-offset-1 dark:border-neutral-600 dark:bg-blue-500"
           >
             {isSaved ? "Settings saved!" : "Save"}
           </button>
