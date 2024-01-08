@@ -9,8 +9,8 @@ export default function Home() {
 
       <br />
 
-      <Link className="text-blue-500" href="/local">
-        /local
+      <Link className="text-blue-500" href="/usernames">
+        /usernames
       </Link>
     </main>
   );

@@ -8,3 +8,7 @@ export const debounce = <T extends (...args: any[]) => void>(
     timeoutId = setTimeout(() => fn(...args), delay);
   };
 };
+
+export const concat = (...args: (string | undefined)[]) => {
+  return args.filter(Boolean).join(" ");
+};

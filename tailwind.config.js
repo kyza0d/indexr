@@ -15,6 +15,10 @@ module.exports = {
               ["margin-top"]: "unset",
               ["margin-bottom"]: "unset",
             },
+            ["ul"]: {
+              ["list-style-type"]: "none",
+              ["padding-left"]: "0",
+            },
           },
         },
       },

@@ -10,13 +10,14 @@
     "seed": "node ./utils/seed.js"
   },
   "dependencies": {
-    "@types/animejs": "^3.1.7",
     "@types/node": "20.2.5",
     "@types/react": "18.2.8",
     "@types/react-dom": "18.2.4",
-    "animejs": "^3.2.1",
     "autoprefixer": "10.4.14",
+    "date-fns": "^3.1.0",
     "faker": "^6.6.6",
+    "file-system": "^2.2.2",
+    "formidable": "^3.5.1",
     "fuse.js": "^6.6.2",
     "lodash": "^4.17.21",
     "next": "13.4.4",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
     "@tailwindcss/typography": "^0.5.10",
+    "@types/formidable": "^3.4.5",
     "@types/lodash": "^4.14.195"
   }
 }

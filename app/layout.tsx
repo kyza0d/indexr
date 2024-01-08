@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Providers } from "./providers";
+import Header from "@/layout/Header";
 
 export const metadata = {
   title: "Create Next App",
@@ -9,7 +10,8 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning={true}>
-      <body className="prose mx-auto max-w-[900px] dark:prose-invert">
+      <body className="prose mx-auto max-w-[1200px] dark:prose-invert">
+        <Header />
         <Providers>
           <main>{children}</main>
         </Providers>
