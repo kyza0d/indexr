@@ -4,7 +4,7 @@ interface Item {
   [key: string]: string;
 }
 
-const useLoadItems = (itemsFile: string) => {
+const useRetrieveData = (itemsFile: string) => {
   const [error, setError] = useState<Error | null>(null);
 
   const loadItems = async (): Promise<Item[]> => {
@@ -50,4 +50,4 @@ const useLoadItems = (itemsFile: string) => {
   return { loadItems, error };
 };
 
-export default useLoadItems;
+export default useRetrieveData;
