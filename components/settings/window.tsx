@@ -8,6 +8,17 @@ import { useSettings } from "@/components/settings/context";
 import { ConfigType } from "@/types";
 import { useTheme } from "next-themes";
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Card } from "../ui/card";
+
 const layout_options = [
   "Grid View", "List View", "Detail View",
   "Card View", "Table View", "Compact View",
@@ -167,7 +178,7 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         name={name}
         value={value}
         onChange={onChange}
-        className="h-10 rounded-md border border-neutral-300 px-4 pr-8 -outline-offset-1 dark:border-neutral-600 dark:bg-neutral-900"
+        className="h-10 rounded-md border px-4 pr-8 -outline-offset-1"
       >
         {options.map((option: string) => (
           <option key={option} value={option}>
@@ -178,21 +189,17 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     );
   };
 
-  const Checkbox = ({ name, value, onChange }: any) => {
-    return <input type="checkbox" name={name} checked={value} onChange={onChange} />;
-  };
-
   return (
     <>
       {dragging && <div className="fixed inset-0 z-10" style={{ pointerEvents: "none" }}></div>}
 
-      <div
+      <Card
         ref={settingsWindowRef}
         style={{ position: "fixed", left: "0", top: "0" }}
-        className="w-[50vw] rounded-md border border-neutral-300 bg-white shadow dark:border-neutral-600 dark:bg-neutral-950"
+        className="w-[50vw] border"
       >
         <div
-          className="sticky top-0 flex cursor-move items-center rounded-t-md border-b border-neutral-300 bg-gray-200 p-2 dark:border-neutral-600 dark:bg-neutral-900"
+          className="sticky top-0 flex cursor-move items-center rounded-t-md border-b p-2"
           onMouseDown={handleMouseDown}
         >
           <h4 className="m-0">Settings</h4>
@@ -206,33 +213,21 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <hr />
           <div>
             <label className="mr-3">Thumbnail Key:</label>
-            <Dropdown
-              name="thumbnailKey"
-              options={Object.keys(updatedConfig.keys)}
-              value={updatedConfig.thumbnailKey}
-              onChange={handleChange}
-            />
+            {
+              <Dropdown
+                name="thumbnailKey"
+                options={Object.keys(updatedConfig.keys)}
+                value={updatedConfig.thumbnailKey}
+                onChange={handleChange}
+              />
+            }
           </div>
 
           <div className="flex items-center">
             <div className="h-full bg-[#888888]"></div>
           </div>
 
-          <div className="flex items-center">
-            <p className="mr-3">Show Key:</p>
-            <div>
-              <input
-                type="checkbox"
-                name="showKey"
-                checked={updatedConfig.showKey}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <h2>Shown Keys:</h2>
-
-          <hr className="border-t border-gray-400" />
+          <hr className="border-t" />
 
           {Object.entries(updatedConfig.keys).map(([key, value]) => (
             <div key={key} className="flex items-center">
@@ -253,7 +248,7 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           <h2>Layout:</h2>
 
-          <hr className="border-top-gray-400 border" />
+          <hr className="border-t" />
 
           <div className="flex items-center">
             <p className="mr-4">View:</p>
@@ -261,7 +256,7 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               name="layout"
               value={updatedConfig.layout}
               onChange={handleChange}
-              className="h-10 max-w-[120px] rounded-md border border-neutral-300 px-4 pr-8 -outline-offset-1 dark:border-neutral-600 dark:bg-neutral-900"
+              className="h-10 max-w-[120px] rounded-md border px-4 pr-8 -outline-offset-1"
             >
               {layout_options.map((layout) => (
                 <option key={layout} value={layout}>
@@ -275,7 +270,7 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <p className="mr-4">Theme:</p>
             <select
               name="theme"
-              className="h-10 rounded-md border border-neutral-300 px-4 pr-8 -outline-offset-1 dark:border-neutral-600 dark:bg-neutral-900"
+              className="h-10 rounded-md border px-4 pr-8 -outline-offset-1"
             >
               <option onClick={() => setTheme("system")} value="system">
                 System
@@ -290,10 +285,10 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
 
         </div>
-        <div className="sticky bottom-0 flex items-center justify-start gap-3 rounded-b-md border-t border-neutral-300 bg-gray-200 p-2 dark:border-neutral-600 dark:bg-neutral-900">
+        <div className="sticky bottom-0 flex items-center justify-start gap-3 rounded-b-md border-t p-2">
           <button
             onClick={saveConfig}
-            className="h-10 w-fit rounded-md px-4 -outline-offset-1 dark:border-neutral-600 dark:bg-blue-500"
+            className="h-10 w-fit rounded-md px-4 -outline-offset-1 dark:bg-blue-500"
           >
             {isSaved ? "Settings saved!" : "Save"}
           </button>
@@ -304,7 +299,7 @@ const SettingsWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             {isReset ? "Settings reset!" : "Reset"}
           </button>
         </div>
-      </div>
+      </Card>
     </>
   );
 };

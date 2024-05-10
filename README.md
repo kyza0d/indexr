@@ -1,5 +1,7 @@
 # Indexr
 
+.image ./assets/logo.png
+
 Indexr is a web application developed with Next.js, incorporating a feature-rich and interactive search functionality. It utilizes React for its user interface, Tailwind CSS for styling, and Fuse.js for advanced search capabilities.
 
 ## Features
