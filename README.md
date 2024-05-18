@@ -1,6 +1,6 @@
-# Indexr
+# indexr
 
-.image ./assets/logo.png
+![Indexr Logo](https://raw.githubusercontent.com/kyza0d/indexr/master/assets/logo.png)
 
 Indexr is a web application developed with Next.js, incorporating a feature-rich and interactive search functionality. It utilizes React for its user interface, Tailwind CSS for styling, and Fuse.js for advanced search capabilities.
 
@@ -13,25 +13,6 @@ Indexr is a web application developed with Next.js, incorporating a feature-rich
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/kyza-k/indexr.git
-
-# Navigate to the project directory
-cd indexr
-
-# Install dependencies
-npm install
-```
-
-## Usage
-
-```bash
-# To run the development server:
-npm run dev
-
-# To build for production:
-npm run build
-
 # To start the production server:
 npm start
 
